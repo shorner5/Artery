@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/content_frame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior" tools:showIn="@layout/app_bar_main"
+    tools:context="com.stuhorner.drawingsample.MainActivity">
+
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_alignBaseline="@+id/swipecards"
+        android:layout_height="20dp"
+        android:layout_marginBottom="5dp"
+        android:src="@drawable/easel_top"
+        android:layout_centerHorizontal="true"/>
+
+    <ImageView
+        android:id="@+id/topEasel"
+        android:layout_width="320dp"
+        android:layout_height="100dp"
+        android:src="@drawable/easel_bottom"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="80dp"/>
+
+    <com.lorentzos.flingswipe.SwipeFlingAdapterView
+        android:layout_alignBaseline="@id/topEasel"
+        android:layout_marginTop="5dp"
+        android:id="@id/swipecards"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:rotation_degrees="16"
+        app:max_visible="4"
+        app:min_adapter_stack="6"/>
+
+</RelativeLayout>
