@@ -1,7 +1,9 @@
 package com.stuhorner.drawingsample;
 
 import android.support.v7.widget.RecyclerView;
+import android.view.GestureDetector;
 import android.view.View;
+import android.widget.AdapterView;
 
 public class ItemClickSupport {
     private final RecyclerView mRecyclerView;

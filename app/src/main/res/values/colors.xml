@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#00b09f</color>
+    <color name="colorPrimary">#00bfad</color>
     <color name="colorPrimaryDark">#009486</color>
-    <color name="colorAccent">#00b09f</color>
+    <color name="colorAccent">#00bfad</color>
     <color name="green">#7DBF43</color>
     <color name="orange">#E8B948</color>
     <color name="red">#FF6E5F</color>
@@ -15,6 +15,8 @@
     <color name="chat_bubble_out">#efefef</color>
     <color name="background_material_light">#ffffff</color>
     <color name="snow_white">#F1EFEF</color>
+    <color name="yes_button_green">#00bf4d</color>
+    <color name="compliment">#b00011</color>
 
 
 </resources>

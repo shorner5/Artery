@@ -1,12 +1,12 @@
 package com.stuhorner.drawingsample;
 
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
-
 import com.appyvet.rangebar.RangeBar;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -37,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     DrawerLayout drawer;
     NavigationView navigationView, filterView;
 
+    public final static String PERSON_NAME = "com.stuhorner.buckit.PERSON_NAME";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +57,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
+                if (page == ON_DRAWING) {
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                }
             }
             @Override
             public void onDrawerOpened(View drawerView) {
-                //super.onDrawerOpened(drawerView);
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, findViewById(R.id.nav_view));
             }
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -74,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
         filterView = (NavigationView) findViewById(R.id.filter_view);
         initFilter();
+        initNavHeader();
     }
 
     @Override
@@ -176,6 +180,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void handleFilter() {
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         drawer.openDrawer(filterView);
+    }
+
+    private void initNavHeader() {
+        navigationView.getHeaderView(0).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                intent.putExtra(PERSON_NAME, "Stuart Horner");
+                intent.putExtra("buttons_off", true);
+                startActivity(intent);
+            }
+        });
     }
 
     private void initFilter() {

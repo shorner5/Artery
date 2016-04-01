@@ -1,5 +1,6 @@
 package com.stuhorner.drawingsample;
 
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -7,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -30,7 +32,6 @@ import java.util.List;
 public class ChatPage extends AppCompatActivity {
     List<String> messages;
     ImageButton sendButton;
-    public final static String PERSON_NAME = "com.stuhorner.drawingsample.PERSON_NAME";
     String person_name;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -124,10 +125,12 @@ public class ChatPage extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.chat_profile) {
-            /*Intent intent = new Intent(ChatPage.this, Profile.class);
-            intent.putExtra(PERSON_NAME, person_name);
+            Intent intent = new Intent(ChatPage.this, ProfileActivity.class);
+            intent.putExtra(MainActivity.PERSON_NAME, person_name);
+            Log.d("name", person_name);
+            intent.putExtra("buttons_off", true);
             startActivity(intent);
-            overridePendingTransition(R.anim.slide_in, R.anim.fade_out);*/
+            overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
         }
         return false;
     }
