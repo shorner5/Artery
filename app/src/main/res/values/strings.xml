@@ -9,7 +9,7 @@
     <string name="action_color">Color Picker</string>
     <string name="action_brush">Brush Size</string>
     <string name="delete_drawing">Clear Canvas?</string>
-    <string name="delete_drawing_small">Are you sure you want to clear the canvas? This cannot be undone.</string>
+    <string name="delete_drawing_small">You sure you wanna do that?</string>
     <string name="new_drawing_warning">Your current drawing will be completely erased, do you want to proceed?</string>
     <string name="action_redo">Redo</string>
     <string name="action_share">Share</string>
@@ -30,6 +30,7 @@
     <string name="action_chat">Chat</string>
     <string name="action_critique">Critique</string>
     <string name="action_gallery">My Gallery</string>
+    <string name="action_edit">Edit</string>
 
     <string name="card_title"><b>%1$s</b>, <b>%2$s</b></string>
 
@@ -37,7 +38,14 @@
 
     <string name="age">Age Preference</string>
     <string name="title_activity_profile">Profile</string>
-    <string name="add_confirm"><b>%1$s</b> is now on your Buck It List.</string>
+    <string name="change_picture">Change my profile picture</string>
     <string name="gallery">Gallery</string>
+
+    <string name="pref_discover">Discoverable</string>
+    <string name="pref_match_notif">New Matches</string>
+    <string name="pref_message_notif">Messages</string>
+    <string name="pref_notif">Notifications</string>
+    <string name="profile_text">profile_text</string>
+    <string name="default_profile_text">Tell everyone a little bit about yourself here.</string>
 
 </resources>

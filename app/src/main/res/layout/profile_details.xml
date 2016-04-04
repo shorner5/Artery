@@ -9,6 +9,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
         <TextView
             android:id="@+id/p_text"
             android:layout_width="match_parent"
@@ -18,7 +22,24 @@
             android:paddingLeft="16dp"
             android:paddingTop="16dp"
             android:paddingRight="16dp"
-            android:paddingBottom="96dp"/>
+            android:paddingBottom="96dp"
+            android:visibility="visible"/>
 
+        <EditText
+            android:id="@+id/p_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:scrollbars="vertical"
+            android:paddingLeft="16dp"
+            android:paddingTop="16dp"
+            android:paddingRight="16dp"
+            android:paddingBottom="96dp"
+            android:inputType="textMultiLine|textCapSentences"
+            android:visibility="invisible"
+            android:background="@android:color/transparent"
+            />
+
+        </FrameLayout>
     </android.support.v4.widget.NestedScrollView>
 </LinearLayout>

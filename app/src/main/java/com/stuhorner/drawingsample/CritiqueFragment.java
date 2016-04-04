@@ -1,5 +1,6 @@
 package com.stuhorner.drawingsample;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
 import android.media.Image;
@@ -7,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -28,7 +30,6 @@ public class CritiqueFragment extends Fragment {
     List<Integer> userAges, drawings;
     CardAdapter adapter;
     ImageButton yesButton, noButton;
-    public final static String PERSON_NAME = "com.stuhorner.drawingsample.PERSON_NAME";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
@@ -47,6 +48,12 @@ public class CritiqueFragment extends Fragment {
 
     private void handleCardSwipes() {
         flingContainer.setFlingListener(new SwipeFlingAdapterView.onFlingListener() {
+            boolean noDown = false, yesDown = false;
+            final Animation scaleDownYes = AnimationUtils.loadAnimation(getContext(), R.anim.translate_down);
+            final Animation scaleUpYes = AnimationUtils.loadAnimation(getContext(), R.anim.translate_up);
+            final Animation scaleDownNo = AnimationUtils.loadAnimation(getContext(), R.anim.translate_down);
+            final Animation scaleUpNo = AnimationUtils.loadAnimation(getContext(), R.anim.translate_up);
+
             @Override
             public void removeFirstObjectInAdapter() {
                 userNames.remove(0);
@@ -57,10 +64,18 @@ public class CritiqueFragment extends Fragment {
 
             @Override
             public void onLeftCardExit(Object dataObject) {
+                if (noDown) {
+                    noDown = false;
+                    noButton.startAnimation(scaleUpNo);
+                }
             }
 
             @Override
             public void onRightCardExit(Object dataObject) {
+                if (yesDown) {
+                    yesDown = false;
+                    yesButton.startAnimation(scaleUpYes);
+                }
             }
 
             @Override
@@ -73,6 +88,27 @@ public class CritiqueFragment extends Fragment {
 
             @Override
             public void onScroll(float f) {
+                scaleUpYes.setFillAfter(true); scaleUpNo.setFillAfter(true);
+                scaleDownYes.setFillAfter(true); scaleDownNo.setFillAfter(true);
+                if (f == -1 && !noDown) {
+                    noButton.startAnimation(scaleDownNo);
+                    noDown = true;
+                    yesDown = false;
+                } else if (f == 1 && !yesDown) {
+                    yesButton.startAnimation(scaleDownYes);
+                    yesDown = true;
+                    noDown = false;
+                }
+                if (f < 1 && f > -1) {
+                    if (noDown) {
+                        noButton.startAnimation(scaleUpNo);
+                        noDown = false;
+                    }
+                    if (yesDown) {
+                        yesButton.startAnimation(scaleUpYes);
+                        yesDown = false;
+                    }
+                }
             }
         });
 
@@ -80,7 +116,7 @@ public class CritiqueFragment extends Fragment {
             @Override
             public void onItemClicked(int position, Object dataObject) {
                 Intent intent = new Intent(getActivity(), ProfileActivity.class);
-                intent.putExtra(PERSON_NAME, userNames.get(position));
+                intent.putExtra(MainActivity.PERSON_NAME, userNames.get(position));
                 intent.putExtra("buttons_off", false);
                 startActivityForResult(intent, 1);
                 getActivity().overridePendingTransition(R.anim.slide_in, R.anim.fade_out);

@@ -67,4 +67,5 @@
     <dimen name="filter_icon_dimen">68dp</dimen>
     <dimen name="detail_backdrop_height">256dp</dimen>
 
+    <integer name="bitmapMaxSize">1200</integer>
 </resources>

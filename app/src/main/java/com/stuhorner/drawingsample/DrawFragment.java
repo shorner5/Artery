@@ -114,19 +114,18 @@ public class DrawFragment extends Fragment {
                 else {
                     List<Float> animRadiiList = initAnimList();
                     customView.setBrushSize(radii.get(position));
-                    Log.d("Position:", Integer.toString(position));
+                    Log.d("Size:", Float.toString(animRadiiList.get(position)));
 
                     AnimationSet animationSet = new AnimationSet(true);
                     animationSet.setInterpolator(new DecelerateInterpolator());
                     animationSet.setFillAfter(true);
 
-                    ScaleAnimation scaleAnimUp= new ScaleAnimation(animRadiiList.get(position), 1f , animRadiiList.get(position), 1f, Animation.RELATIVE_TO_SELF, .5f,Animation.RELATIVE_TO_SELF, .5f);
+                    ScaleAnimation scaleAnimUp= new ScaleAnimation(animRadiiList.get(position)/.8f, .8f , animRadiiList.get(position)/.8f, .8f, Animation.RELATIVE_TO_SELF, .5f,Animation.RELATIVE_TO_SELF, .5f);
                     scaleAnimUp.setDuration(200);
 
-                    ScaleAnimation scaleAnimDown= new ScaleAnimation(1f, animRadiiList.get(position), 1f, animRadiiList.get(position), Animation.RELATIVE_TO_SELF, .5f,Animation.RELATIVE_TO_SELF, .5f);
+                    ScaleAnimation scaleAnimDown= new ScaleAnimation(.8f, animRadiiList.get(position)/.8f, .8f, animRadiiList.get(position)/.8f, Animation.RELATIVE_TO_SELF, .5f,Animation.RELATIVE_TO_SELF, .5f);
                     scaleAnimDown.setDuration(200);
                     scaleAnimDown.setStartOffset(500);
-                    v.startAnimation(scaleAnimDown);
 
                     animationSet.addAnimation(scaleAnimDown);
                     animationSet.addAnimation(scaleAnimUp);

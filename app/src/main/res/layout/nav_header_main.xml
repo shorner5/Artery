@@ -9,11 +9,17 @@
     android:theme="@style/ThemeOverlay.AppCompat.Dark" android:orientation="vertical"
     android:gravity="bottom">
 
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:paddingTop="@dimen/nav_header_vertical_spacing" android:text="User"
-        android:textColor="@android:color/white" />
+    <TextView
+        android:id="@+id/header_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/nav_header_vertical_spacing"
+        android:text="User"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:textSize="@dimen/text_size_header"/>
 
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:text="@string/edit_profile" android:id="@+id/textView" />
+        android:text="@string/edit_profile" />
 
 </LinearLayout>

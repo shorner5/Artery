@@ -86,7 +86,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if (page == ON_CRITIQUE) {
+                super.onBackPressed();
+            }
+            else {
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new CritiqueFragment()).commit();
+                if (getSupportActionBar() != null) {getSupportActionBar().setTitle("");}
+                AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+                appBarLayout.setElevation(0);
+                page = ON_CRITIQUE;
+                invalidateOptionsMenu();
+            }
         }
     }
 
@@ -138,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, findViewById(R.id.filter_view));
                 fragment = new CritiqueFragment();
                 fragmentManager= getSupportFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "MAIN_FRAG").commit();
                 if (getSupportActionBar() != null) {getSupportActionBar().setTitle("");}
                 appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
                 appBarLayout.setElevation(0);
@@ -160,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragment = new ChatFragment();
                 fragmentManager = getSupportFragmentManager();
                 fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-                if (getSupportActionBar() != null) {getSupportActionBar().setTitle("Chat");}
+                if (getSupportActionBar() != null) {getSupportActionBar().setTitle(R.string.action_chat);}
                 appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
                 appBarLayout.setElevation(8);
                 page = HIDE_MENU;
@@ -169,8 +179,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_gallery:
                 break;
             case R.id.nav_settings:
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, new SettingsFragment()).commit();
+                if (getSupportActionBar() != null) {getSupportActionBar().setTitle(R.string.action_settings);}
+                appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+                appBarLayout.setElevation(8);
+                page = HIDE_MENU;
+                invalidateOptionsMenu();
+
                 break;
         }
+        navigationView.setCheckedItem(R.id.nav_settings);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -189,6 +207,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                 intent.putExtra(PERSON_NAME, "Stuart Horner");
                 intent.putExtra("buttons_off", true);
+                intent.putExtra("editable", true);
                 startActivity(intent);
             }
         });
