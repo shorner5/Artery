@@ -25,8 +25,7 @@ import com.appyvet.rangebar.RangeBar;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     final static int MIN_AGE_ALLOWED = 18;
     final static int HIDE_MENU = 3;
-    final static int ON_CRITIQUE = 1;
-    final static int ON_DRAWING = 2;
+    final static int ON_CRITIQUE = 1, ON_DRAWING = 2;
     boolean isMaleOn = true;
     boolean isFemaleOn = true;
     boolean near_me = true;
@@ -95,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
                 appBarLayout.setElevation(0);
                 page = ON_CRITIQUE;
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
                 invalidateOptionsMenu();
             }
         }
@@ -103,12 +103,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        page = getIntent().getIntExtra("page", page);
+        getIntent().removeExtra("page");
         if (page == ON_CRITIQUE) {
             getMenuInflater().inflate(R.menu.main, menu);
             menu.findItem(R.id.action_filter).getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
         }
         else if (page == ON_DRAWING) {
             getMenuInflater().inflate(R.menu.menu_drawing_top, menu);
+            if (getSupportActionBar() != null) { getSupportActionBar().setTitle(""); }
             menu.findItem(R.id.action_done).getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
         }
         return true;
@@ -160,7 +163,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragment = new DrawFragment();
                 fragmentManager= getSupportFragmentManager();
                 fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-                if (getSupportActionBar() != null) {getSupportActionBar().setTitle("");}
                 appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
                 appBarLayout.setElevation(8);
                 page = ON_DRAWING;
@@ -177,6 +179,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 invalidateOptionsMenu();
                 break;
             case R.id.nav_gallery:
+                fragment = new GalleryFragment();
+                fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                if (getSupportActionBar() != null) {getSupportActionBar().setTitle(R.string.action_gallery);}
+                appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+                appBarLayout.setElevation(8);
+                page = HIDE_MENU;
+                invalidateOptionsMenu();
                 break;
             case R.id.nav_settings:
                 getFragmentManager().beginTransaction().replace(R.id.content_frame, new SettingsFragment()).commit();
@@ -189,7 +199,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
         navigationView.setCheckedItem(R.id.nav_settings);
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

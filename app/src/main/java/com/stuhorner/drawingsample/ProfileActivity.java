@@ -1,7 +1,10 @@
 package com.stuhorner.drawingsample;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
@@ -59,6 +62,15 @@ public class ProfileActivity extends AppCompatActivity{
         yesButton = (ImageButton)findViewById(R.id.p_yes_button);
         changeProfilePic = (Button)findViewById(R.id.change_picture);
         backdrop = (ImageView) findViewById(R.id.backdrop);
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        String bitmapURL = sharedPref.getString(getString(R.string.profile_picture),null);
+        if (bitmapURL != null) {
+            Log.d("bitmap", bitmapURL);
+            Bitmap bitmap = BitmapFactory.decodeFile(bitmapURL);
+            backdrop.setImageBitmap(resize(bitmap));
+        }
+        else
+            Log.d("bitmap", "null :(");
         setupEdit();
 
         if (buttons_on) {
@@ -145,8 +157,9 @@ public class ProfileActivity extends AppCompatActivity{
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Bitmap bitmap = null;
+        Uri selectedImage = null;
         if (requestCode == GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
-            Uri selectedImage = data.getData();
+            selectedImage = data.getData();
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
             } catch (FileNotFoundException e) {
@@ -156,13 +169,37 @@ public class ProfileActivity extends AppCompatActivity{
             }
         }
         if (bitmap != null) {
-            int bitmapHeight = bitmap.getHeight(), bitmapWidth = bitmap.getWidth();
-            while (bitmapHeight > getResources().getInteger(R.integer.bitmapMaxSize) || bitmapWidth > getResources().getInteger(R.integer.bitmapMaxSize)) {
-                bitmapHeight = bitmapHeight / 2;
-                bitmapWidth = bitmapWidth / 2;
-            }
-            bitmap = Bitmap.createScaledBitmap(bitmap, bitmapWidth, bitmapHeight, false);
+            bitmap = resize(bitmap);
+            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(getString(R.string.profile_picture), getPathFromURI(selectedImage));
+            editor.apply();
+            Log.d("path", getPathFromURI(selectedImage));
             backdrop.setImageBitmap(bitmap);
+        }
+    }
+
+    private Bitmap resize(Bitmap bitmap) {
+        int bitmapHeight = bitmap.getHeight(), bitmapWidth = bitmap.getWidth();
+        while (bitmapHeight > getResources().getInteger(R.integer.bitmapMaxSize) || bitmapWidth > getResources().getInteger(R.integer.bitmapMaxSize)) {
+            bitmapHeight = bitmapHeight / 2;
+            bitmapWidth = bitmapWidth / 2;
+        }
+        return Bitmap.createScaledBitmap(bitmap, bitmapWidth, bitmapHeight, false);
+    }
+
+    private String getPathFromURI(Uri uri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = {MediaStore.Images.Media.DATA};
+            cursor = getApplicationContext().getContentResolver().query(uri,proj,null,null,null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
 

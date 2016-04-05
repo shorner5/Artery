@@ -26,4 +26,8 @@
         <item name="spinBars">true</item>
     </style>
 
+    <style name="FullscreenActionBarStyle" parent="AppTheme.NoActionBar">
+        <item name="android:background">@color/colorPrimaryDark</item>
+    </style>
+
 </resources>

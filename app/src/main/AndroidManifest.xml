@@ -28,7 +28,17 @@
             android:name=".ProfileActivity"
             android:label="@string/title_activity_profile"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden|adjustPan">
+            android:windowSoftInputMode="stateHidden|adjustPan" >
+        </activity>
+        <activity
+            android:name=".DisplayDrawingActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_display_drawing"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/FullscreenActionBarStyle" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.stuhorner.drawingsample.MainActivity" />
         </activity>
     </application>
 

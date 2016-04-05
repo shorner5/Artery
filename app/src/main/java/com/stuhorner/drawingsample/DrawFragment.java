@@ -1,14 +1,21 @@
 package com.stuhorner.drawingsample;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -49,6 +56,8 @@ public class DrawFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_draw, container, false);
         customView = (CustomView) view.findViewById(R.id.custom_view);
+        setHasOptionsMenu(true);
+        setBackgroundImage();
 
         scrollPalette = (RecyclerView) view.findViewById(R.id.palette);
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -110,8 +119,7 @@ public class DrawFragment extends Fragment {
                 if (paletteMode) {
                     customView.setPaintColor(colors.get(position));
                     v.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.translate_down_up));
-                }
-                else {
+                } else {
                     List<Float> animRadiiList = initAnimList();
                     customView.setBrushSize(radii.get(position));
                     Log.d("Size:", Float.toString(animRadiiList.get(position)));
@@ -120,10 +128,10 @@ public class DrawFragment extends Fragment {
                     animationSet.setInterpolator(new DecelerateInterpolator());
                     animationSet.setFillAfter(true);
 
-                    ScaleAnimation scaleAnimUp= new ScaleAnimation(animRadiiList.get(position)/.8f, .8f , animRadiiList.get(position)/.8f, .8f, Animation.RELATIVE_TO_SELF, .5f,Animation.RELATIVE_TO_SELF, .5f);
+                    ScaleAnimation scaleAnimUp = new ScaleAnimation(animRadiiList.get(position) / .8f, .8f, animRadiiList.get(position) / .8f, .8f, Animation.RELATIVE_TO_SELF, .5f, Animation.RELATIVE_TO_SELF, .5f);
                     scaleAnimUp.setDuration(200);
 
-                    ScaleAnimation scaleAnimDown= new ScaleAnimation(.8f, animRadiiList.get(position)/.8f, .8f, animRadiiList.get(position)/.8f, Animation.RELATIVE_TO_SELF, .5f,Animation.RELATIVE_TO_SELF, .5f);
+                    ScaleAnimation scaleAnimDown = new ScaleAnimation(.8f, animRadiiList.get(position) / .8f, .8f, animRadiiList.get(position) / .8f, Animation.RELATIVE_TO_SELF, .5f, Animation.RELATIVE_TO_SELF, .5f);
                     scaleAnimDown.setDuration(200);
                     scaleAnimDown.setStartOffset(500);
 
@@ -134,6 +142,19 @@ public class DrawFragment extends Fragment {
             }
 
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_done) {
+            saveImage(false);
+            Fragment fragment = new GalleryFragment();
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+            getActivity().getIntent().putExtra("page", MainActivity.HIDE_MENU);
+            getActivity().invalidateOptionsMenu();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void handleDrawingIconTouched(int itemId) {
@@ -148,7 +169,7 @@ public class DrawFragment extends Fragment {
                 customView.onClickRedo();
                 break;
             case R.id.action_save:
-                saveImage();
+                saveImage(true);
                 break;
             case R.id.action_brush:
                 if (paletteMode && !ongoingAnimation)
@@ -180,14 +201,38 @@ public class DrawFragment extends Fragment {
         deleteDialog.show();
     }
 
-    private void saveImage() {
-        customView.setDrawingCacheEnabled(true);
-        customView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
-        Bitmap bm = customView.getDrawingCache();
-        String path = Environment.getExternalStorageDirectory().getAbsolutePath();
-        File dir = new File(path + "/" + getString(R.string.app_name));
+    private void setBackgroundImage() {
+        String backgroundImage = getActivity().getIntent().getStringExtra("edit_image");
+        getActivity().getIntent().removeExtra("edit_image");
+        Bitmap bitmap = BitmapFactory.decodeFile(backgroundImage);
+        if (backgroundImage != null) {
+            customView.setBackground(new BitmapDrawable(getResources(), bitmap));
+        } else {
+            customView.setBackgroundColor(getResources().getColor(android.R.color.white));
+        }
+    }
 
-        String title = "card" + "_" + System.currentTimeMillis() + ".png";
+    private void saveImage(boolean toGallery) {
+        customView.setDrawingCacheEnabled(true);
+        customView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_AUTO);
+        Bitmap bm = customView.getDrawingCache();
+
+        String path; File dir;
+        if (toGallery) {
+            path = Environment.getExternalStorageDirectory().getAbsolutePath();
+            dir = new File(path + "/" + getString(R.string.app_name));
+        }
+        else {
+            ContextWrapper cw = new ContextWrapper(getActivity().getApplicationContext());
+            dir = cw.getExternalFilesDir(null);
+            Log.d("Directory", "" + dir.getAbsolutePath());
+            SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(getString(R.string.directory), dir.getAbsolutePath());
+            editor.apply();
+        }
+
+        String title = "drawing" + System.currentTimeMillis() + ".png";
         String saved = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), customView.getDrawingCache(), title, "drawing");
 
         try {
@@ -197,7 +242,6 @@ public class DrawFragment extends Fragment {
             File file = new File(dir, title);
             FileOutputStream fOut = new FileOutputStream(file);
             bm.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-            fOut.flush();
             fOut.close();
         } catch (FileNotFoundException e){
             e.printStackTrace();
@@ -207,7 +251,7 @@ public class DrawFragment extends Fragment {
             Toast.makeText(getContext(), "Not enough space on this device!", Toast.LENGTH_SHORT).show();
         }
 
-        if (saved != null) {
+        if (saved != null && toGallery) {
             Snackbar.make(customView, "Drawing saved to gallery.", Snackbar.LENGTH_SHORT).show();
         }
         customView.destroyDrawingCache();
