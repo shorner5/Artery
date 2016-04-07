@@ -7,6 +7,7 @@ import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
@@ -88,8 +90,10 @@ public class CritiqueFragment extends Fragment {
 
             @Override
             public void onScroll(float f) {
-                scaleUpYes.setFillAfter(true); scaleUpNo.setFillAfter(true);
-                scaleDownYes.setFillAfter(true); scaleDownNo.setFillAfter(true);
+                scaleUpYes.setFillAfter(true);
+                scaleUpNo.setFillAfter(true);
+                scaleDownYes.setFillAfter(true);
+                scaleDownNo.setFillAfter(true);
                 if (f == -1 && !noDown) {
                     noButton.startAnimation(scaleDownNo);
                     noDown = true;
@@ -137,42 +141,37 @@ public class CritiqueFragment extends Fragment {
         }
     }
     private void handleButtons(){
-        final Animation scaleDownYes = AnimationUtils.loadAnimation(getContext(), R.anim.translate_down);
-        scaleDownYes.setFillAfter(true);
-        final Animation scaleUpYes = AnimationUtils.loadAnimation(getContext(),R.anim.translate_up);
-        scaleUpYes.setFillAfter(true);
+        addAnimation(yesButton);
+        addAnimation(noButton);
+    }
 
-        yesButton.setOnTouchListener(new View.OnTouchListener() {
+    private void handleButtonLogic(ImageButton button) {
+        if (button == noButton)
+            flingContainer.getTopCardListener().selectLeft();
+        else if (button == yesButton) {
+            flingContainer.getTopCardListener().selectRight();
+            TextView name = (TextView) flingContainer.getSelectedView().findViewById(R.id.card_name);
+            MatchOverlayFragment match = MatchOverlayFragment.newInstance(name.getText());
+            match.show(getActivity().getFragmentManager(), "hello");
+        }
+    }
+
+    private void addAnimation(final ImageButton button) {
+        final Animation scaleDown = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.translate_down);
+        scaleDown.setFillAfter(true);
+        final Animation scaleUp = AnimationUtils.loadAnimation(getActivity().getApplicationContext(),R.anim.translate_up);
+        scaleUp.setFillAfter(true);
+
+        button.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 switch (motionEvent.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        yesButton.startAnimation(scaleDownYes);
+                        button.startAnimation(scaleDown);
                         break;
                     case MotionEvent.ACTION_UP:
-                        yesButton.startAnimation(scaleUpYes);
-                        flingContainer.getTopCardListener().selectRight();
-                        break;
-                }
-                return false;
-            }
-        });
-
-        final Animation scaleDownNo = AnimationUtils.loadAnimation(getContext(),R.anim.translate_down);
-        scaleDownNo.setFillAfter(true);
-        final Animation scaleUpNo = AnimationUtils.loadAnimation(getContext(),R.anim.translate_up);
-        scaleUpNo.setFillAfter(true);
-
-        noButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                switch (motionEvent.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN:
-                        noButton.startAnimation(scaleDownNo);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        noButton.startAnimation(scaleUpNo);
-                        flingContainer.getTopCardListener().selectLeft();
+                        button.startAnimation(scaleUp);
+                        handleButtonLogic(button);
                         break;
                 }
                 return false;

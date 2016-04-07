@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.media.Image;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -103,16 +106,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+
+        //default: unlock left, lock right
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, findViewById(R.id.filter_view));
+
         page = getIntent().getIntExtra("page", page);
         getIntent().removeExtra("page");
+        Log.d("page:", Integer.toString(page));
         if (page == ON_CRITIQUE) {
             getMenuInflater().inflate(R.menu.main, menu);
             menu.findItem(R.id.action_filter).getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         }
         else if (page == ON_DRAWING) {
             getMenuInflater().inflate(R.menu.menu_drawing_top, menu);
             if (getSupportActionBar() != null) { getSupportActionBar().setTitle(""); }
             menu.findItem(R.id.action_done).getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         }
         return true;
     }
@@ -141,10 +152,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Fragment fragment;
         android.support.v4.app.FragmentManager fragmentManager;
         AppBarLayout appBarLayout;
-
-        //default: unlock left, lock right
-        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, findViewById(R.id.filter_view));
 
         switch (id) {
             case R.id.nav_main:
@@ -199,8 +206,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
         navigationView.setCheckedItem(R.id.nav_settings);
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                drawer.closeDrawer(GravityCompat.START);
+            }
+        }, 0);
+
         return true;
     }
 

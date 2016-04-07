@@ -153,6 +153,9 @@ public class DrawFragment extends Fragment {
             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
             getActivity().getIntent().putExtra("page", MainActivity.HIDE_MENU);
             getActivity().invalidateOptionsMenu();
+            if (((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.action_gallery));
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -252,7 +255,7 @@ public class DrawFragment extends Fragment {
         }
 
         if (saved != null && toGallery) {
-            Snackbar.make(customView, "Drawing saved to gallery.", Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(customView, R.string.saved, Snackbar.LENGTH_SHORT).show();
         }
         customView.destroyDrawingCache();
     }

@@ -18,7 +18,7 @@
         android:layout_centerHorizontal="true"/>
 
     <ImageView
-        android:id="@+id/topEasel"
+        android:id="@+id/bottomEasel"
         android:layout_width="320dp"
         android:layout_height="100dp"
         android:src="@drawable/easel_bottom"
@@ -27,7 +27,7 @@
         android:layout_marginBottom="80dp"/>
 
     <com.lorentzos.flingswipe.SwipeFlingAdapterView
-        android:layout_alignBaseline="@id/topEasel"
+        android:layout_alignBaseline="@id/bottomEasel"
         android:layout_marginTop="5dp"
         android:id="@id/swipecards"
         android:layout_width="match_parent"
