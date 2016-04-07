@@ -1,5 +1,6 @@
 package com.stuhorner.drawingsample;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -41,6 +42,7 @@ public class ImageAdapter extends BaseAdapter {
         return 0;
     }
 
+    @TargetApi(21)
     public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView;
         if (convertView == null) {
@@ -55,6 +57,7 @@ public class ImageAdapter extends BaseAdapter {
             imageView = (ImageView) convertView;
         }
         imageView.setImageBitmap(images.get(position));
+        imageView.setTransitionName("image_scale");
         return imageView;
     }
 

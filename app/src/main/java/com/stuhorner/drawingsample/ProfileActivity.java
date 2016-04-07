@@ -62,15 +62,18 @@ public class ProfileActivity extends AppCompatActivity{
         yesButton = (ImageButton)findViewById(R.id.p_yes_button);
         changeProfilePic = (Button)findViewById(R.id.change_picture);
         backdrop = (ImageView) findViewById(R.id.backdrop);
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-        String bitmapURL = sharedPref.getString(getString(R.string.profile_picture),null);
-        if (bitmapURL != null) {
-            Log.d("bitmap", bitmapURL);
-            Bitmap bitmap = BitmapFactory.decodeFile(bitmapURL);
-            backdrop.setImageBitmap(resize(bitmap));
+        if (edittable) {
+            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+            String bitmapURL = sharedPref.getString(getString(R.string.profile_picture), null);
+            if (bitmapURL != null) {
+                try {
+                    Bitmap bitmap = BitmapFactory.decodeFile(bitmapURL);
+                    backdrop.setImageBitmap(resize(bitmap));
+                } catch (Exception e) {
+                    backdrop.setImageResource(R.drawable.example_profilepic);
+                }
+            }
         }
-        else
-            Log.d("bitmap", "null :(");
         setupEdit();
 
         if (buttons_on) {

@@ -12,9 +12,9 @@ import android.util.Log;
  * Created by Stu on 4/5/2016.
  */
 public class GalleryOptionsDialog extends android.support.v4.app.DialogFragment {
-    final static int SET_AS_CARD = 0;
-    final static int EDIT = 1;
-    final static int REMOVE = 2;
+    final static int SET_AS_CARD = 1;
+    final static int EDIT = 2;
+    final static int REMOVE = 3;
 
     private OnDialogSelectionListener callback;
 
@@ -30,7 +30,7 @@ public class GalleryOptionsDialog extends android.support.v4.app.DialogFragment 
                 .setItems(R.array.gallery_options, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         Log.d("which", Integer.toString(which));
-                        callback.onDialogSelection(which);
+                        callback.onDialogSelection(which + 1);
                     }
                 });
         return builder.create();

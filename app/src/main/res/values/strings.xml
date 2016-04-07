@@ -44,10 +44,15 @@
 
     <string name="gallery_options_title">Options</string>
     <string-array name="gallery_options">
-        <item>Set as my card</item>
-        <item>Open in the editor</item>
-        <item>Remove</item>
+        <item>@string/set_as_card</item>peci
+        <item>@string/edit</item>
+        <item>@string/remove</item>
     </string-array>
+
+    <string name="set_as_card">Set as my card</string>
+    <string name="card_set">Card updated</string>
+    <string name="edit">Open in the editor</string>
+    <string name="remove">Remove from my gallery</string>
 
     <string name="pref_discover">Discoverable</string>
     <string name="pref_match_notif">New Matches</string>
@@ -57,9 +62,5 @@
     <string name="default_profile_text">Tell everyone a little bit about yourself here.</string>
     <string name="directory">directory_name</string>
     <string name="profile_picture">profile_picture_address</string>
-
-    <string name="title_activity_display_drawing">DisplayDrawingActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
 
 </resources>

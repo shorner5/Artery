@@ -2,9 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:fitsSystemWindows="true"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/black"
-    android:id="@+id/fullscreen_layout">
+    android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/fullscreen_image"
@@ -12,6 +10,49 @@
         android:layout_height="wrap_content"
         android:scaleType="fitCenter"
         android:layout_centerInParent="true"
-        android:transitionName="transition"/>
+        android:layout_above="@+id/set_as_card"
+        android:transitionName="image_scale"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/set_as_card"
+        android:id="@+id/set_as_card"
+        android:layout_above="@+id/edit"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:background="?selectableItemBackground"
+        android:textColor="@color/colorPrimaryDark" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/edit"
+        android:id="@id/edit"
+        android:layout_above="@+id/remove"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:background="?selectableItemBackground"
+        android:textColor="@color/colorPrimaryDark"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/remove"
+        android:id="@+id/remove"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:clickable="true"
+        android:background="?selectableItemBackground"
+        android:textColor="@color/colorPrimaryDark"/>
 
 </RelativeLayout>
