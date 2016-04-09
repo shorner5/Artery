@@ -127,7 +127,6 @@ public class ChatPage extends AppCompatActivity {
         if (item.getItemId() == R.id.chat_profile) {
             Intent intent = new Intent(ChatPage.this, ProfileActivity.class);
             intent.putExtra(MainActivity.PERSON_NAME, person_name);
-            Log.d("name", person_name);
             intent.putExtra("buttons_off", true);
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in, R.anim.fade_out);

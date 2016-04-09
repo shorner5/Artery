@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Draw</string>
+    <string name="app_name">Artery</string>
 
     <string name="action_done">Done</string>
     <string name="action_erase">Erase</string>
@@ -31,9 +31,11 @@
     <string name="action_critique">Critique</string>
     <string name="action_gallery">My Gallery</string>
     <string name="action_edit">Edit</string>
+    <string name="logout"> Log out</string>
 
     <string name="card_title"><b>%1$s</b>, <b>%2$s</b></string>
     <string name="send_message">Send <b>%1$s</b> a message</string>
+    <string name="match_view_profile">View <b>%1$s</b>\'s profile</string>
     <string name="match">It\'s a match!</string>
 
     <string name="animTime">200</string>
@@ -66,5 +68,19 @@
     <string name="directory">directory_name</string>
     <string name="profile_picture">profile_picture_address</string>
     <string name="title_activity_match_overlay">MatchOverlayActivity</string>
+
+    <!-- Log in/first launch strings -->
+    <string name="name_title">Hello,\nwhat\'s your name?</string>
+    <string name="name_input">My first name...</string>
+    <string name="login_title">How would you like to log in?</string>
+    <string name="email_hint">email</string>
+    <string name="password_hint">password</string>
+    <string name="profile_picture_title">Create your profile</string>
+    <string name="add_profile_picture">Add a profile picture</string>
+    <string name="skip">Skip</string>
+    <string name="next">Next</string>
+    <string name="login">Log In</string>
+    <string name="draw_title">Skip to drawing your first card</string>
+    <string name="draw_subtitle">This is other users\' first impression of you.</string>
 
 </resources>

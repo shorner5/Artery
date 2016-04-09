@@ -27,7 +27,7 @@
     </style>
 
     <style name="FullscreenActionBarStyle" parent="AppTheme.NoActionBar">
-        <item name="android:background">@color/colorPrimaryDark</item>
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
     </style>
 
 </resources>

@@ -24,4 +24,13 @@
             style="?android:buttonBarButtonStyle"
             />
 
+    <Button
+        android:layout_width="match_parent"
+        android:textColor="@android:color/white"
+        android:id="@+id/match_view_profile"
+        android:layout_height="60dp"
+        android:background="@color/orange"
+        style="?android:buttonBarButtonStyle"
+        />
+
 </LinearLayout>

@@ -2,12 +2,12 @@ package com.stuhorner.drawingsample;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -23,17 +23,16 @@ import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
+import android.widget.TextView;
+
 import com.appyvet.rangebar.RangeBar;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     final static int MIN_AGE_ALLOWED = 18;
     final static int HIDE_MENU = 3;
     final static int ON_CRITIQUE = 1, ON_DRAWING = 2;
-    boolean isMaleOn = true;
-    boolean isFemaleOn = true;
-    boolean near_me = true;
-    int minAge = 18;
-    int maxAge = 70;
+    boolean isMaleOn = true, isFemaleOn = true, near_me = true;
+    int minAge = 18, maxAge = 70;
     int page = ON_CRITIQUE;
     DrawerLayout drawer;
     NavigationView navigationView, filterView;
@@ -48,10 +47,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {getSupportActionBar().setTitle("");}
 
+        if (isFirstLaunch()) {
+            Intent intent = new Intent(getApplicationContext(), FirstLaunchActivity.class);
+            startActivity(intent);
+        }
+
         Fragment fragment = new CritiqueFragment();
         android.support.v4.app.FragmentManager fragmentManager= getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -101,6 +104,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 invalidateOptionsMenu();
             }
         }
+    }
+
+    private Boolean isFirstLaunch() {
+        SharedPreferences pref = getPreferences(MODE_PRIVATE);
+        Boolean firstLaunch = pref.getBoolean("isFirstLaunch", true);
+        return firstLaunch;
     }
 
     @Override
@@ -234,6 +243,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(intent);
             }
         });
+        SharedPreferences pref = getPreferences(MODE_PRIVATE);
+        String username = pref.getString("Username", null);
+        if (username != null) {
+            Log.d("username", username);
+            TextView textView = (TextView) findViewById(R.id.header_username);
+            textView.setText(username);
+        }
     }
 
     private void initFilter() {

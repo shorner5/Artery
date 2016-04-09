@@ -12,7 +12,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -46,11 +45,10 @@ public class DrawFragment extends Fragment {
     private Toolbar toolbar_bottom;
     private CustomView customView;
     private RecyclerView scrollPalette;
-    private List<Integer> colors = new ArrayList<Integer>();
-    private List<Integer> radii = new ArrayList<Integer>();
+    private List<Integer> colors = new ArrayList<>();
+    private List<Integer> radii = new ArrayList<>();
     LinearLayoutManager layoutManager;
     boolean paletteMode = true, ongoingAnimation = false;
-    int place;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -58,6 +56,7 @@ public class DrawFragment extends Fragment {
         customView = (CustomView) view.findViewById(R.id.custom_view);
         setHasOptionsMenu(true);
         setBackgroundImage();
+        hasTopToolbar();
 
         scrollPalette = (RecyclerView) view.findViewById(R.id.palette);
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -262,7 +261,6 @@ public class DrawFragment extends Fragment {
 
     private void changeStroke() {
         toolbar_bottom.getMenu().findItem(R.id.action_brush).setIcon(R.drawable.ic_color);
-        place = layoutManager.findFirstVisibleItemPosition();
 
         paletteMode = false;
 
@@ -354,5 +352,16 @@ public class DrawFragment extends Fragment {
                 public void onAnimationRepeat(Animation animation) {}
             });
         }
+    }
+
+    private void hasTopToolbar() {
+        SharedPreferences pref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        if (pref.getBoolean("isFirstLaunch", false)) {
+            //TODO: show a toolbar
+        }
+
+        SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
+        editor.putBoolean("isFirstLaunch", false);
+        editor.apply();
     }
 }

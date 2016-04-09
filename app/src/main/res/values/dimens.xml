@@ -44,6 +44,7 @@
     <dimen name="text_size_huge">30sp</dimen>
     <dimen name="text_width_height">170dp</dimen>
     <dimen name="text_size_height">30dp</dimen>
+    <dimen name="text_size_login_title">48sp</dimen>
 
     <!-- Margin & padding -->
     <dimen name="margin_padding_tiny">4dp</dimen>

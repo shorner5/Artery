@@ -150,10 +150,14 @@ public class CritiqueFragment extends Fragment {
             flingContainer.getTopCardListener().selectLeft();
         else if (button == yesButton) {
             flingContainer.getTopCardListener().selectRight();
-            TextView name = (TextView) flingContainer.getSelectedView().findViewById(R.id.card_name);
-            MatchOverlayFragment match = MatchOverlayFragment.newInstance(name.getText());
-            match.show(getActivity().getFragmentManager(), "hello");
+            launchMatch();
         }
+    }
+
+    private void launchMatch() {
+        TextView name = (TextView) flingContainer.getSelectedView().findViewById(R.id.card_name);
+        MatchOverlayFragment match = MatchOverlayFragment.newInstance(name.getText());
+        match.show(getActivity().getFragmentManager(), "hello");
     }
 
     private void addAnimation(final ImageButton button) {

@@ -44,16 +44,24 @@ public class MatchOverlayFragment extends DialogFragment {
         builder.setContentView(view);
 
         Button name = (Button) view.findViewById(R.id.match_name);
+        Button viewProfile = (Button) view.findViewById(R.id.match_view_profile);
         String cardString = getArguments().getString("name");
         String[] matchName = cardString.split(",");
         name.setText(String.format(getResources().getString(R.string.send_message), matchName[0]));
+        viewProfile.setText(String.format(getResources().getString(R.string.match_view_profile), matchName[0]));
 
         Animation anim = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.slide_in);
+        Animation anim2 = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.slide_in);
+        anim2.setInterpolator(new OvershootInterpolator());
+        anim2.setDuration(400);
+        anim2.setStartOffset(200);
         anim.setInterpolator(new OvershootInterpolator());
         anim.setDuration(400);
         name.startAnimation(anim);
+        viewProfile.startAnimation(anim2);
 
         addAnimation(name, matchName);
+        addAnimation(viewProfile, matchName);
 
         return builder;
     }
@@ -72,21 +80,35 @@ public class MatchOverlayFragment extends DialogFragment {
                         button.startAnimation(scaleDown);
                         break;
                     case MotionEvent.ACTION_UP:
-                        button.startAnimation(scaleUp);
-                        Intent intent = new Intent(getActivity(), ChatPage.class);
-                        intent.putExtra(ChatFragment.PERSON_NAME, matchName[0]);
-                        startActivity(intent);
-                        getActivity().overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                dismiss();
-                            }
-                        }, 200);
+                        handleButtonPress(button, matchName);
                         break;
                 }
                 return false;
             }
         });
+    }
+
+    private void handleButtonPress(Button button, String[] matchName) {
+        switch (button.getId()) {
+            case R.id.match_name:
+                Intent intent = new Intent(getActivity(), ChatPage.class);
+                intent.putExtra(ChatFragment.PERSON_NAME, matchName[0]);
+                startActivity(intent);
+                getActivity().overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
+                break;
+            case R.id.match_view_profile:
+                Intent intent2 = new Intent(getActivity(), ProfileActivity.class);
+                intent2.putExtra(MainActivity.PERSON_NAME, matchName[0]);
+                intent2.putExtra("buttons_off", true);
+                startActivity(intent2);
+                getActivity().overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
+                break;
+        }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                dismiss();
+            }
+        }, 200);
     }
 }
