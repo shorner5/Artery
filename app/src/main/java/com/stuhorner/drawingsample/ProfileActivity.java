@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -17,7 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -28,8 +27,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import com.firebase.client.Firebase;
 
 /**
  * Created by Stu on 1/1/2016.
@@ -48,8 +46,10 @@ public class ProfileActivity extends AppCompatActivity{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        Firebase.setAndroidContext(this);
 
         person_name = getIntent().getStringExtra(MainActivity.PERSON_NAME);
+
         buttons_on = getIntent().getBooleanExtra("buttons_off", false);
         edittable = getIntent().getBooleanExtra("editable", false);
         result = 0;
@@ -63,16 +63,7 @@ public class ProfileActivity extends AppCompatActivity{
         changeProfilePic = (Button)findViewById(R.id.change_picture);
         backdrop = (ImageView) findViewById(R.id.backdrop);
         if (edittable) {
-            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-            String bitmapURL = sharedPref.getString(getString(R.string.profile_picture), null);
-            if (bitmapURL != null) {
-                try {
-                    Bitmap bitmap = BitmapFactory.decodeFile(bitmapURL);
-                    backdrop.setImageBitmap(resize(bitmap));
-                } catch (Exception e) {
-                    backdrop.setImageResource(R.drawable.example_profilepic);
-                }
-            }
+            getMyProfilePicture();
         }
         setupEdit();
 
@@ -116,6 +107,37 @@ public class ProfileActivity extends AppCompatActivity{
         return super.onOptionsItemSelected(item);
     }
 
+    private void getMyProfilePicture() {
+        if (User.getInstance().getProfilePicture() != null) {
+            String profilePicture = User.getInstance().getProfilePicture();
+            byte[] bytes = Base64.decode(profilePicture.getBytes(), Base64.DEFAULT);
+            Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            backdrop.setImageBitmap(bm);
+
+            //first time, save picture to device
+            SharedPreferences.Editor editor = getPreferences(Context.MODE_PRIVATE).edit();
+            editor.putString(getString(R.string.profile_picture), User.getInstance().getProfilePicturePath());
+            editor.apply();
+        }
+        else {
+            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+            String bitmapURL = sharedPref.getString(getString(R.string.profile_picture), null);
+            if (bitmapURL != null) {
+                try {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inSampleSize = 8;
+                    Bitmap bitmap = BitmapFactory.decodeFile(bitmapURL, options);
+                    backdrop.setImageBitmap(bitmap);
+                } catch (Exception e) {
+                    backdrop.setImageResource(R.drawable.example_profilepic);
+                }
+            }
+            else {
+                backdrop.setImageResource(R.drawable.example_profilepic);
+
+            }
+        }
+    }
     private void setupToolbar() {
         toolbar = (Toolbar)findViewById(R.id.p_toolbar);
         setSupportActionBar(toolbar);
@@ -139,7 +161,6 @@ public class ProfileActivity extends AppCompatActivity{
     private void setupCollapsingToolbar(){
         final CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbar.setTitleEnabled(false);
-        //TODO: set as user profile picture
     }
     private void setupViewPager(ViewPager viewPager) {
         ProfilePagerAdapter adapter = new ProfilePagerAdapter(getSupportFragmentManager());
@@ -159,36 +180,16 @@ public class ProfileActivity extends AppCompatActivity{
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Bitmap bitmap = null;
         Uri selectedImage = null;
         if (requestCode == GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
             selectedImage = data.getData();
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            BitmapUploadTask task = new BitmapUploadTask(BitmapUploadTask.PROFILE_PICTURE, this);
+            task.execute(getPathFromURI(selectedImage));
         }
-        if (bitmap != null) {
-            bitmap = resize(bitmap);
-            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString(getString(R.string.profile_picture), getPathFromURI(selectedImage));
-            editor.apply();
-            Log.d("path", getPathFromURI(selectedImage));
-            backdrop.setImageBitmap(bitmap);
-        }
-    }
-
-    private Bitmap resize(Bitmap bitmap) {
-        int bitmapHeight = bitmap.getHeight(), bitmapWidth = bitmap.getWidth();
-        while (bitmapHeight > getResources().getInteger(R.integer.bitmapMaxSize) || bitmapWidth > getResources().getInteger(R.integer.bitmapMaxSize)) {
-            bitmapHeight = bitmapHeight / 2;
-            bitmapWidth = bitmapWidth / 2;
-        }
-        return Bitmap.createScaledBitmap(bitmap, bitmapWidth, bitmapHeight, false);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 8;
+        Bitmap bitmap = BitmapFactory.decodeFile(getPathFromURI(selectedImage), options);
+        backdrop.setImageBitmap(bitmap);
     }
 
     private String getPathFromURI(Uri uri) {

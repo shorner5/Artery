@@ -3,6 +3,7 @@
     package="com.stuhorner.drawingsample" >
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
@@ -37,7 +38,7 @@
         </activity>
         <activity android:name=".FirstLaunchActivity"
             android:theme="@style/FullscreenActionBarStyle"
-            android:windowSoftInputMode="adjustResize|stateHidden">
+            android:windowSoftInputMode="adjustPan|stateHidden">
         </activity>
     </application>
 

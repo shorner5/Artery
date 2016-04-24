@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.transition.Slide;
 import android.transition.Transition;
+import android.util.Log;
 import android.view.View;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
@@ -60,6 +61,7 @@ public class DisplayDrawingActivity extends AppCompatActivity {
         remove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d("result:", Integer.toString(GalleryOptionsDialog.REMOVE));
                 setResult(GalleryOptionsDialog.REMOVE, returnIntent);
                 onBackPressed();
             }

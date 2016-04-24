@@ -3,6 +3,7 @@ package com.stuhorner.drawingsample;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -10,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -20,6 +22,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.transition.Explode;
 import android.transition.Slide;
+import android.util.Base64;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -29,8 +32,15 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.deser.Deserializers;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
@@ -39,7 +49,6 @@ public class GalleryFragment extends Fragment implements GalleryOptionsDialog.On
     ImageAdapter img;
     int selected = 0;
     public static final int RESULT_CODE = 2;
-    public static final int RESULT_CANCEL = 3;
 
     @Override
     public void onDialogSelection(int position) {
@@ -60,6 +69,7 @@ public class GalleryFragment extends Fragment implements GalleryOptionsDialog.On
             case GalleryOptionsDialog.REMOVE:
                 boolean delete = new File(img.getItem(selected).toString()).delete();
                 if (delete) {
+                    User.getInstance().removeFromGallery(selected);
                     initData();
                     img.reloadImages(drawings);
                 }
@@ -70,11 +80,11 @@ public class GalleryFragment extends Fragment implements GalleryOptionsDialog.On
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.gallery_layout, container, false);
-        initData();
         final Fragment thisFragment = this;
-
+        initData();
+        Log.d("drawing size", "" + drawings.size());
         if (drawings.size() != 0) { (view.findViewById(R.id.gallery_empty)).setVisibility(View.INVISIBLE); }
-        Log.d("bitmap", "" + drawings.size());
+
 
         GridView gridView = (GridView) view.findViewById(R.id.gallery_grid);
         img = new ImageAdapter(getContext(), drawings);
@@ -104,7 +114,7 @@ public class GalleryFragment extends Fragment implements GalleryOptionsDialog.On
         return view;
     }
 
-    public void startActivityForResult(Fragment fragment, Intent intent,
+    private void startActivityForResult(Fragment fragment, Intent intent,
                                               int requestCode, Bundle options) {
         if (Build.VERSION.SDK_INT >= 16) {
             if ((requestCode & 0xffff0000) != 0) {
@@ -133,11 +143,8 @@ public class GalleryFragment extends Fragment implements GalleryOptionsDialog.On
     public void onActivityResult (int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != Activity.RESULT_CANCELED) {
-            Log.d("result:", Integer.toString(resultCode));
             String path = data.getStringExtra("edit_image");
-            Log.d("path", path);
             selected = drawings.indexOf(path);
-            Log.d("selected:", Integer.toString(selected));
             onDialogSelection(resultCode);
         }
     }
@@ -146,7 +153,6 @@ public class GalleryFragment extends Fragment implements GalleryOptionsDialog.On
         drawings.clear();
         SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
         String dir = sharedPreferences.getString(getString(R.string.directory), null);
-        Log.d("Directory:", dir);
         if (dir != null) {
             File directory = new File(dir);
             File[] files = directory.listFiles();
@@ -154,9 +160,47 @@ public class GalleryFragment extends Fragment implements GalleryOptionsDialog.On
                 try {
                     if (!file.exists()) continue;
                     drawings.add(file.getAbsolutePath());
-                } catch (Exception e) { return; }
+                } catch (Exception e) {
+                    return;
+                }
+            }
+        } else {
+            //if dir is null, load gallery from server
+            for (String i : User.getInstance().getGallery()) {
+                //convert from base64 to bitmap and save to device
+                byte[] imageAsBytes = Base64.decode(i.getBytes(), Base64.DEFAULT);
+                Bitmap image = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
+                drawings.add(saveToDevice(image));
+                image.recycle();
             }
         }
+    }
+
+    private String saveToDevice(Bitmap bm) {
+        ContextWrapper cw = new ContextWrapper(getActivity().getApplicationContext());
+        File file = null, dir = cw.getExternalFilesDir(null);
+        SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
+        editor.putString(getString(R.string.directory), dir.getAbsolutePath());
+        editor.apply();
+
+        String title = "drawing" + System.currentTimeMillis() + ".png";
+        try {
+            if (!dir.isDirectory() || !dir.exists()){
+                dir.mkdirs();
+            }
+            file = new File(dir, title);
+            FileOutputStream fOut = new FileOutputStream(file);
+            bm.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+            fOut.close();
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+            Toast.makeText(getContext(), "Not enough space on this device!", Toast.LENGTH_SHORT).show();
+        } catch(IOException e){
+            e.printStackTrace();
+            Toast.makeText(getContext().getApplicationContext(), "Not enough space on this device!", Toast.LENGTH_SHORT).show();
+        }
+
+        return file.getAbsolutePath();
     }
 }
 

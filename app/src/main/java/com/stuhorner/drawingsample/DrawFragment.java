@@ -4,13 +4,16 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -31,6 +34,7 @@ import android.view.animation.BounceInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.io.File;
@@ -56,7 +60,7 @@ public class DrawFragment extends Fragment {
         customView = (CustomView) view.findViewById(R.id.custom_view);
         setHasOptionsMenu(true);
         setBackgroundImage();
-        hasTopToolbar();
+        hasTopToolbar(view);
 
         scrollPalette = (RecyclerView) view.findViewById(R.id.palette);
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -227,7 +231,6 @@ public class DrawFragment extends Fragment {
         else {
             ContextWrapper cw = new ContextWrapper(getActivity().getApplicationContext());
             dir = cw.getExternalFilesDir(null);
-            Log.d("Directory", "" + dir.getAbsolutePath());
             SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putString(getString(R.string.directory), dir.getAbsolutePath());
@@ -244,6 +247,12 @@ public class DrawFragment extends Fragment {
             File file = new File(dir, title);
             FileOutputStream fOut = new FileOutputStream(file);
             bm.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+            //add to User's gallery
+            if (!toGallery) {
+                BitmapUploadTask task = new BitmapUploadTask(BitmapUploadTask.ADD_TO_GALLERY);
+                task.execute(file.getAbsolutePath());
+            }
+
             fOut.close();
         } catch (FileNotFoundException e){
             e.printStackTrace();
@@ -344,7 +353,6 @@ public class DrawFragment extends Fragment {
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    //scrollPalette.getAdapter().notifyItemChanged(j);
                     ongoingAnimation = false;
                 }
 
@@ -354,14 +362,46 @@ public class DrawFragment extends Fragment {
         }
     }
 
-    private void hasTopToolbar() {
-        SharedPreferences pref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        if (pref.getBoolean("isFirstLaunch", false)) {
-            //TODO: show a toolbar
-        }
+    private void hasTopToolbar(View view) {
+        if (getActivity().getIntent().getBooleanExtra("firstLaunchDraw", false)) {
+            RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            p.addRule(RelativeLayout.BELOW, R.id.toolbar_top);
+            p.addRule(RelativeLayout.ABOVE, R.id.palette);
+            p.setMargins(0, 12, 0, 4);
+            customView.setLayoutParams(p);
 
-        SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
-        editor.putBoolean("isFirstLaunch", false);
-        editor.apply();
+            Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar_top);
+            toolbar.setVisibility(View.VISIBLE);
+            toolbar.inflateMenu(R.menu.menu_drawing_top_first);
+            toolbar.getMenu().findItem(R.id.action_done).getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
+            toolbar.getMenu().findItem(R.id.action_help).getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
+            toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.action_done:
+                            saveImage(false);
+                            getActivity().finish();
+                            break;
+                        case R.id.action_help:
+                            showHelpDialog();
+                            break;
+                    }
+                    return false;
+                }
+            });
+        }
+    }
+
+    private void showHelpDialog() {
+        android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(getContext());
+        alertDialogBuilder.setTitle(R.string.help_title);
+        alertDialogBuilder.setMessage(R.string.help_body).
+                setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialogBuilder.create().show();
     }
 }

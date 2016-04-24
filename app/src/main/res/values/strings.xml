@@ -16,7 +16,7 @@
     <string name="label_brush_size">Brush Size:</string>
 
     <string name="title_activity_main">MainActivity</string>
-    <string name="edit_profile">My profile</string>
+    <string name="edit_profile">View my profile</string>
     <string name="chat_profile">Profile</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -31,6 +31,7 @@
     <string name="action_critique">Critique</string>
     <string name="action_gallery">My Gallery</string>
     <string name="action_edit">Edit</string>
+    <string name="action_help">Help</string>
     <string name="logout"> Log out</string>
 
     <string name="card_title"><b>%1$s</b>, <b>%2$s</b></string>
@@ -64,6 +65,7 @@
     <string name="pref_message_notif">Messages</string>
     <string name="pref_notif">Notifications</string>
     <string name="profile_text">profile_text</string>
+    <string name="profile_name">profile_name</string>
     <string name="default_profile_text">Tell everyone a little bit about yourself here.</string>
     <string name="directory">directory_name</string>
     <string name="profile_picture">profile_picture_address</string>
@@ -71,16 +73,37 @@
 
     <!-- Log in/first launch strings -->
     <string name="name_title">Hello,\nwhat\'s your name?</string>
-    <string name="name_input">My first name...</string>
-    <string name="login_title">How would you like to log in?</string>
-    <string name="email_hint">email</string>
-    <string name="password_hint">password</string>
+    <string name="name_input">Name</string>
+    <string name="age_input">Age</string>
+    <string name="password_info">Your password must be at least 6 characters.</string>
+    <string name="email_info">This email isn\'t valid.</string>
+    <string name="email_taken">There\'s already an account with this email!</string>
+    <string name="name_info">Your name must have at least 2 characters.</string>
+    <string name="login_title">Create your login information</string>
+    <string name="select_different_picture">Select another picture</string>
+    <string name="min_age">You must be at least 18 to create an account.</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Password</string>
     <string name="profile_picture_title">Create your profile</string>
     <string name="add_profile_picture">Add a profile picture</string>
     <string name="skip">Skip</string>
     <string name="next">Next</string>
-    <string name="login">Log In</string>
+    <string name="login">Or, Log In</string>
+    <string name="login_title2">Enter your login information</string>
+    <string name="add_profile">Say something about yourself here</string>
     <string name="draw_title">Skip to drawing your first card</string>
     <string name="draw_subtitle">This is other users\' first impression of you.</string>
+    <string name="authenticating">Authenticating</string>
+    <string name="login_error">Error: please check your internet connection.</string>
+    <string name="login_wrong">This email and password combination isn\'t associated with an account</string>
+
+    <string name="gender_male">Male</string>
+    <string name="gender_female">Female</string>
+    <string name="gender_neither">Neither</string>
+    <string name="gender_error">Specify a sex</string>
+    <string name="gender_error_detial">Please specify your sex before continuing. </string>
+
+    <string name="help_title">Draw your first card</string>
+    <string name="help_body">This is other user\'s first impression of you, and their first interaction with you. Get creative, and draw anything that represents you. </string>
 
 </resources>

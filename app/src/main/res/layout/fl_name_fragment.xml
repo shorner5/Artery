@@ -12,35 +12,59 @@
         android:id="@+id/name_title"
         android:textColor="@android:color/white"
         android:textSize="@dimen/text_size_login_title"
-        android:layout_marginTop="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="8dp"/>
+        android:layout_margin="16dp"/>
 
     <EditText
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="wrap_content"
         android:id="@+id/input_name"
         android:hint="@string/name_input"
         android:focusable="true"
-        android:inputType="textCapWords|textNoSuggestions"
-        android:textColorHint="@color/colorPrimaryDark"
+        android:inputType="textCapWords|textVisiblePassword"
+        android:textColorHint="@android:color/white"
         android:textColor="@android:color/white"
         android:textStyle="italic"
         android:textSize="@dimen/text_size_large"
         android:layout_below="@id/name_title"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:imeOptions="actionDone"
-        android:textCursorDrawable="@null"/>
+        android:imeOptions="actionNext"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/input_age"
+        android:hint="@string/age_input"
+        android:focusable="true"
+        android:inputType="number"
+        android:textColorHint="@android:color/white"
+        android:textColor="@android:color/white"
+        android:textStyle="italic"
+        android:textSize="@dimen/text_size_large"
+        android:layout_below="@id/input_name"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
+        android:imeOptions="actionNext"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/nameErrorText"
+        android:layout_below="@id/input_age"
+        android:layout_alignLeft="@+id/input_name"
+        android:layout_alignStart="@+id/input_name"
+        android:textColor="@android:color/white"
+        android:visibility="invisible"/>
 
     <Button
         android:id="@+id/login_button"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="?attr/actionBarSize"
         android:layout_alignParentBottom="true"
         style="?android:buttonBarButtonStyle"
-        android:background="@android:color/white"
+        android:background="@drawable/edittext_background"
+        android:layout_margin="16dp"
         android:textColor="@color/colorPrimary"
         android:text="@string/login" />
 </RelativeLayout>

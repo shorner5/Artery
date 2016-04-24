@@ -29,7 +29,6 @@ public class GalleryOptionsDialog extends android.support.v4.app.DialogFragment 
         builder.setTitle(R.string.gallery_options_title)
                 .setItems(R.array.gallery_options, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Log.d("which", Integer.toString(which));
                         callback.onDialogSelection(which + 1);
                     }
                 });

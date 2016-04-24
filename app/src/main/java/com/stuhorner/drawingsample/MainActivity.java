@@ -1,6 +1,7 @@
 package com.stuhorner.drawingsample;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
@@ -26,6 +27,11 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.appyvet.rangebar.RangeBar;
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     final static int MIN_AGE_ALLOWED = 18;
@@ -36,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     int page = ON_CRITIQUE;
     DrawerLayout drawer;
     NavigationView navigationView, filterView;
+    public static Firebase rootRef;
+
 
     public final static String PERSON_NAME = "com.stuhorner.buckit.PERSON_NAME";
 
@@ -46,11 +54,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {getSupportActionBar().setTitle("");}
+        Firebase.setAndroidContext(this);
+        rootRef = new Firebase("https://artery.firebaseio.com/");
 
-        if (isFirstLaunch()) {
+        //create User instance
+        new User(this);
+
+        //if (isFirstLaunch()) {
             Intent intent = new Intent(getApplicationContext(), FirstLaunchActivity.class);
-            startActivity(intent);
-        }
+            startActivityForResult(intent, 1);
+        //}
 
         Fragment fragment = new CritiqueFragment();
         android.support.v4.app.FragmentManager fragmentManager= getSupportFragmentManager();
@@ -86,6 +99,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode,resultCode,data);
+        Log.d("Here", "ACTIVITYYY");
+        if (requestCode == 1)
+            initNavHeader();
+    }
+
+    @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -108,8 +129,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private Boolean isFirstLaunch() {
         SharedPreferences pref = getPreferences(MODE_PRIVATE);
-        Boolean firstLaunch = pref.getBoolean("isFirstLaunch", true);
-        return firstLaunch;
+        boolean isFirstLaunch = pref.getBoolean("isFirstLaunch", true);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean("isFirstLaunch", false);
+        editor.apply();
+        return isFirstLaunch;
     }
 
     @Override
@@ -234,22 +258,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initNavHeader() {
         navigationView.getHeaderView(0).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-                intent.putExtra(PERSON_NAME, "Stuart Horner");
-                intent.putExtra("buttons_off", true);
-                intent.putExtra("editable", true);
-                startActivity(intent);
-            }
-        });
-        SharedPreferences pref = getPreferences(MODE_PRIVATE);
-        String username = pref.getString("Username", null);
-        if (username != null) {
-            Log.d("username", username);
-            TextView textView = (TextView) findViewById(R.id.header_username);
-            textView.setText(username);
-        }
+           @Override
+           public void onClick(View view) {
+               final Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+               intent.putExtra("editable", true);
+               intent.putExtra("buttons_off", true);
+               intent.putExtra(PERSON_NAME, User.getInstance().getName());
+               startActivity(intent);
+           }
+       });
     }
 
     private void initFilter() {

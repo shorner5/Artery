@@ -6,8 +6,12 @@
     android:background="@android:color/white">
 
     <android.support.v4.widget.NestedScrollView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         <FrameLayout
             android:layout_width="wrap_content"
@@ -41,5 +45,16 @@
             />
 
         </FrameLayout>
+
+            <ProgressBar
+                android:id="@+id/p_progress_bar"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:padding="16dp"
+                android:layout_centerInParent="true"
+                android:visibility="invisible"
+                />
+
+        </RelativeLayout>
     </android.support.v4.widget.NestedScrollView>
 </LinearLayout>
