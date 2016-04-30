@@ -1,15 +1,26 @@
 package com.stuhorner.drawingsample;
 
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
+import android.widget.Adapter;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +28,8 @@ import java.util.List;
  * Created by Stu on 3/23/2016.
  */
 public class ProfileGalleryFragment extends Fragment {
-    private List<Integer> data;
+    ArrayList<String> drawings;
+    ProfileGalleryAdapter adapter;
     public ProfileGalleryFragment(){}
 
     @Override
@@ -27,18 +39,16 @@ public class ProfileGalleryFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity().getBaseContext());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
-        data = initData();
-        ProfileGalleryAdapter adapter = new ProfileGalleryAdapter(data);
-        recyclerView.setAdapter(adapter);
-
+        drawings = new ArrayList<>();
+        adapter = new ProfileGalleryAdapter(drawings);
+        ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.profile_gallery_loading);
+        initData(recyclerView, progressBar);
         return view;
     }
 
-    private List<Integer> initData(){
-        List<Integer> gallery_items = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            gallery_items.add(R.drawable.example_drawing);
-        }
-        return gallery_items;
+    private void initData(RecyclerView recyclerView, ProgressBar progressBar) {
+        progressBar.setVisibility(View.VISIBLE);
+        ProfileGalleryInitTask task = new ProfileGalleryInitTask(getActivity(), recyclerView, drawings, adapter, progressBar);
+        task.execute();
     }
 }

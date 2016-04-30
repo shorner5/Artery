@@ -1,5 +1,7 @@
 package com.stuhorner.drawingsample;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,16 +9,27 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Stu on 3/23/2016.
  */
 public class ProfileGalleryAdapter extends RecyclerView.Adapter<ProfileGalleryAdapter.MyViewHolder> {
-    List<Integer> mListData;
+    List<String> mListData;
+    List<Bitmap> images = new ArrayList<>();
 
-    public ProfileGalleryAdapter(List<Integer> mListData) {
+    public ProfileGalleryAdapter(List<String> mListData) {
         this.mListData = mListData;
+        fillImages();
+    }
+
+    private void fillImages() {
+        for (String uri : mListData) {
+            Bitmap bm = BitmapFactory.decodeFile(uri);
+            images.add(bm);
+        }
     }
 
     @Override
@@ -28,7 +41,7 @@ public class ProfileGalleryAdapter extends RecyclerView.Adapter<ProfileGalleryAd
 
     @Override
     public void onBindViewHolder(MyViewHolder myViewHolder, int i) {
-        myViewHolder.img.setImageResource(mListData.get(i));
+        myViewHolder.img.setImageBitmap(images.get(i));
     }
 
     @Override

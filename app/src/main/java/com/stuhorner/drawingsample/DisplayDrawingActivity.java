@@ -48,7 +48,7 @@ public class DisplayDrawingActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 setResult(GalleryOptionsDialog.SET_AS_CARD, returnIntent);
-                Snackbar.make(view, R.string.card_set, Snackbar.LENGTH_SHORT).show();
+                onBackPressed();
             }
         });
         edit.setOnClickListener(new View.OnClickListener() {

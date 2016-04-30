@@ -1,5 +1,7 @@
 package com.stuhorner.drawingsample;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -43,7 +45,10 @@ public class FirstLaunchLoginFragment extends Fragment {
                         @Override
                         public void onAuthenticated(AuthData authData) {
                             showLoading(false);
-                            User.getInstance().populateUser(authData.getUid());
+                            MyUser.getInstance().populateUser(authData.getUid());
+                            SharedPreferences.Editor pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE).edit();
+                            pref.putString("UID", MyUser.getInstance().getUID());
+                            pref.apply();
                             getActivity().finish();
                         }
 

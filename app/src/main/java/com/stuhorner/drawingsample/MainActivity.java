@@ -2,15 +2,14 @@ package com.stuhorner.drawingsample;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
-import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -24,14 +23,11 @@ import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import com.appyvet.rangebar.RangeBar;
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     final static int MIN_AGE_ALLOWED = 18;
@@ -57,13 +53,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Firebase.setAndroidContext(this);
         rootRef = new Firebase("https://artery.firebaseio.com/");
 
-        //create User instance
-        new User(this);
+        //create MyUser instance
+        new MyUser(this);
 
-        //if (isFirstLaunch()) {
+
+        SharedPreferences pref = this.getSharedPreferences("data", MODE_PRIVATE);
+        if (isFirstLaunch() || pref.getString("UID", null) == null) {
+            clearSavedData();
             Intent intent = new Intent(getApplicationContext(), FirstLaunchActivity.class);
             startActivityForResult(intent, 1);
-        //}
+        }
+        else {
+            MyUser.getInstance().populateUser(pref.getString("UID", null));
+        }
 
         Fragment fragment = new CritiqueFragment();
         android.support.v4.app.FragmentManager fragmentManager= getSupportFragmentManager();
@@ -100,10 +102,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode,resultCode,data);
-        Log.d("Here", "ACTIVITYYY");
-        if (requestCode == 1)
-            initNavHeader();
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            final android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(this, R.style.AppTheme_PopupOverlay);
+            alertDialogBuilder.setTitle(R.string.welcome_title);
+            alertDialogBuilder.setMessage(R.string.welcome_body).
+                    setPositiveButton("GOT IT", new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialogBuilder.create().show();
+        }
     }
 
     @Override
@@ -128,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private Boolean isFirstLaunch() {
-        SharedPreferences pref = getPreferences(MODE_PRIVATE);
+        SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
         boolean isFirstLaunch = pref.getBoolean("isFirstLaunch", true);
         SharedPreferences.Editor editor = pref.edit();
         editor.putBoolean("isFirstLaunch", false);
@@ -146,7 +156,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         page = getIntent().getIntExtra("page", page);
         getIntent().removeExtra("page");
-        Log.d("page:", Integer.toString(page));
         if (page == ON_CRITIQUE) {
             getMenuInflater().inflate(R.menu.main, menu);
             menu.findItem(R.id.action_filter).getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
@@ -263,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                final Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                intent.putExtra("editable", true);
                intent.putExtra("buttons_off", true);
-               intent.putExtra(PERSON_NAME, User.getInstance().getName());
+               intent.putExtra(PERSON_NAME, MyUser.getInstance().getName());
                startActivity(intent);
            }
        });
@@ -363,6 +372,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 break;
         }
+    }
+
+    private void clearSavedData() {
+        SharedPreferences sharedPreferences = getSharedPreferences("data", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        //delete gallery files
+        String dir = sharedPreferences.getString(getString(R.string.directory), null);
+
+        if (dir != null) {
+            File directory = new File(dir);
+            for (File file : directory.listFiles()) {
+                file.delete();
+            }
+        }
+        editor.clear();
+        editor.apply();
     }
 
 }

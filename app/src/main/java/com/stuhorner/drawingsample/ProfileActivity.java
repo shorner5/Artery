@@ -108,19 +108,19 @@ public class ProfileActivity extends AppCompatActivity{
     }
 
     private void getMyProfilePicture() {
-        if (User.getInstance().getProfilePicture() != null) {
-            String profilePicture = User.getInstance().getProfilePicture();
+        if (MyUser.getInstance().getProfilePicture() != null) {
+            String profilePicture = MyUser.getInstance().getProfilePicture();
             byte[] bytes = Base64.decode(profilePicture.getBytes(), Base64.DEFAULT);
             Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             backdrop.setImageBitmap(bm);
 
             //first time, save picture to device
-            SharedPreferences.Editor editor = getPreferences(Context.MODE_PRIVATE).edit();
-            editor.putString(getString(R.string.profile_picture), User.getInstance().getProfilePicturePath());
+            SharedPreferences.Editor editor = getSharedPreferences("data", Context.MODE_PRIVATE).edit();
+            editor.putString(getString(R.string.profile_picture), MyUser.getInstance().getProfilePicturePath());
             editor.apply();
         }
         else {
-            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences sharedPref = getSharedPreferences("data", Context.MODE_PRIVATE);
             String bitmapURL = sharedPref.getString(getString(R.string.profile_picture), null);
             if (bitmapURL != null) {
                 try {

@@ -16,7 +16,6 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -68,14 +67,18 @@ public class FirstLaunchCreateLoginFragment extends Fragment {
                             rootRef.authWithPassword(email.getText().toString(), password.getText().toString(), new Firebase.AuthResultHandler() {
                                 @Override
                                 public void onAuthenticated(AuthData authData) {
-                                    User.getInstance().setUID(result.get("uid"));
+                                    MyUser.getInstance().setUID(result.get("uid"));
+                                    //save UID
+                                    SharedPreferences.Editor pref = getActivity().getSharedPreferences("UID", Context.MODE_PRIVATE).edit();
+                                    pref.putString("UID", MyUser.getInstance().getUID());
+                                    pref.apply();
 
                                     //set name and age
-                                    SharedPreferences pref = getActivity().getPreferences(Context.MODE_PRIVATE);
-                                    User.getInstance().setName(pref.getString("Username", null));
-                                    User.getInstance().setAge(pref.getInt("age", 0));
+                                    SharedPreferences getData = getActivity().getPreferences(Context.MODE_PRIVATE);
+                                    MyUser.getInstance().setName(getData.getString("Username", null));
+                                    MyUser.getInstance().setAge(getData.getInt("age", 0));
 
-                                    User.getInstance().setEmail(email.getText().toString());
+                                    MyUser.getInstance().setEmail(email.getText().toString());
                                     FirstLaunchActivity.mPager.setCurrentItem(FirstLaunchActivity.mPager.getCurrentItem() + 1);
                                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                                     imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);

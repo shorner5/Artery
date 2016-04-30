@@ -13,16 +13,14 @@ import java.util.List;
  * Created by Stu on 3/29/2016.
  */
 public class CardAdapter extends BaseAdapter {
-    private List<String> userNames;
-    List<Integer> imageId, userAges;
+    private List<OtherUser> users;
+    List<Integer> drawings, userNames, userAges;
     Context context;
     private static LayoutInflater inflater;
 
-    public CardAdapter(Context context, List<String> userNames, List<Integer> userAges, List<Integer> imageIds) {
-        this.userNames = userNames;
-        this.userAges = userAges;
+    public CardAdapter(Context context, List<OtherUser> users) {
+        this.users = users;
         this.context = context;
-        this.imageId = imageIds;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -60,7 +58,7 @@ public class CardAdapter extends BaseAdapter {
         holder.name = (TextView) view.findViewById(R.id.card_name);
         holder.img = (ImageView) view.findViewById(R.id.card_drawing);
         holder.name.setText(String.format(context.getResources().getString(R.string.card_title), userNames.get(position), Integer.toString(userAges.get(position))));
-        holder.img.setImageResource(imageId.get(position));
+        holder.img.setImageResource(R.drawable.example_drawing);
 
         return view;
     }

@@ -28,8 +28,7 @@ import java.util.List;
 
 public class CritiqueFragment extends Fragment {
     SwipeFlingAdapterView flingContainer;
-    List<String> userNames;
-    List<Integer> userAges, drawings;
+    List<OtherUser> users = new ArrayList<>();
     CardAdapter adapter;
     ImageButton yesButton, noButton;
 
@@ -39,8 +38,8 @@ public class CritiqueFragment extends Fragment {
         View view = inflater.inflate(R.layout.content_main, container, false);
         initData();
         flingContainer = (SwipeFlingAdapterView) view.findViewById(R.id.swipecards);
-        adapter = new CardAdapter(getActivity().getApplicationContext(),userNames,userAges,drawings);
-        flingContainer.setAdapter(adapter);
+        //adapter = new CardAdapter(getActivity().getApplicationContext(),users);
+        //flingContainer.setAdapter(adapter);
         yesButton = (ImageButton) view.findViewById(R.id.yes_button);
         noButton = (ImageButton) view.findViewById(R.id.no_button);
         handleCardSwipes();
@@ -58,9 +57,7 @@ public class CritiqueFragment extends Fragment {
 
             @Override
             public void removeFirstObjectInAdapter() {
-                userNames.remove(0);
-                userAges.remove(0);
-                drawings.remove(0);
+                users.remove(0);
                 adapter.notifyDataSetChanged();
             }
 
@@ -82,9 +79,7 @@ public class CritiqueFragment extends Fragment {
 
             @Override
             public void onAdapterAboutToEmpty(int itemsInAdapter) {
-                userNames.add("Kanye West");
-                userAges.add(39);
-                drawings.add(R.drawable.example_drawing);
+                initData();
                 adapter.notifyDataSetChanged();
             }
 
@@ -115,15 +110,14 @@ public class CritiqueFragment extends Fragment {
                 }
             }
         });
-
         flingContainer.setOnItemClickListener(new SwipeFlingAdapterView.OnItemClickListener() {
             @Override
             public void onItemClicked(int position, Object dataObject) {
-                Intent intent = new Intent(getActivity(), ProfileActivity.class);
-                intent.putExtra(MainActivity.PERSON_NAME, userNames.get(position));
+                /*Intent intent = new Intent(getActivity(), ProfileActivity.class);
+                intent.putExtra(MainActivity.PERSON_NAME,);
                 intent.putExtra("buttons_off", false);
                 startActivityForResult(intent, 1);
-                getActivity().overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
+                getActivity().overridePendingTransition(R.anim.slide_in, R.anim.fade_out);*/
             }
         });
     }
@@ -184,22 +178,7 @@ public class CritiqueFragment extends Fragment {
     }
 
     private void initData() {
-        userNames = new ArrayList<>();
-        userNames.add("Fred");
-        userNames.add("Joe");
-        userNames.add("Bob");
-        userNames.add("Srikar");
-        userNames.add("Harry");
-        userNames.add("Fred 2.0");
-        userNames.add("Fred 2.1");
-        userNames.add("Terminator");
-
-        userAges = new ArrayList<>();
-        drawings = new ArrayList<>();
-
-        for (int i = 0; i < 8; i++) {
-            userAges.add(20 + i);
-            drawings.add(R.drawable.example_drawing);
-        }
+        //UserDownloadTask task = new UserDownloadTask();
+        //task.execute();
     }
 }

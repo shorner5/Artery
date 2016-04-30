@@ -99,7 +99,7 @@ public class FirstLaunchAddProfileFragment extends Fragment {
             case R.id.button_skip:
                 if (genderSelected) {
                     if (editText.getText().length() > 0) {
-                        User.getInstance().setProfileText(editText.getText().toString());
+                        MyUser.getInstance().setProfileText(editText.getText().toString());
                     }
                     FirstLaunchActivity.mPager.setCurrentItem(FirstLaunchActivity.mPager.getCurrentItem() + 1);
                 }
@@ -127,17 +127,17 @@ public class FirstLaunchAddProfileFragment extends Fragment {
             case R.id.button_gender_male:
                 clearGender();
                 button.setTextColor(getResources().getColor(R.color.green));
-                User.getInstance().setGender(User.MALE);
+                MyUser.getInstance().setGender(MyUser.MALE);
                 break;
             case R.id.button_gender_female:
                 clearGender();
                 button.setTextColor(getResources().getColor(R.color.green));
-                User.getInstance().setGender(User.FEMALE);
+                MyUser.getInstance().setGender(MyUser.FEMALE);
                 break;
             case R.id.button_gender_neither:
                 clearGender();
                 button.setTextColor(getResources().getColor(R.color.green));
-                User.getInstance().setGender(User.NEITHER);
+                MyUser.getInstance().setGender(MyUser.NEITHER);
                 break;
         }
     }

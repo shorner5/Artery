@@ -35,7 +35,7 @@ public class ImageAdapter extends BaseAdapter {
     public int getCount() {
         return images.size();
     }
-    public Object getItem(int i) {
+    public String getItem(int i) {
         return imageURLs.get(i);
     }
     public long getItemId(int position) {

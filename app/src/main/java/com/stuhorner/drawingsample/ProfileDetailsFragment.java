@@ -14,11 +14,9 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
@@ -67,12 +65,12 @@ public class ProfileDetailsFragment extends Fragment {
     }
 
     private void saveText() {
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(getString(R.string.profile_text), textView.getText().toString());
         editor.apply();
 
-        User.getInstance().setProfileText(textView.getText().toString());
+        MyUser.getInstance().setProfileText(textView.getText().toString());
         //TODO: save to interwebs
     }
 
@@ -82,7 +80,7 @@ public class ProfileDetailsFragment extends Fragment {
         //if user's profile
         if (getActivity().getIntent().getBooleanExtra("editable", false)) {
             //get text saved to the device
-            SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
             //TODO: PUT THIS IN LOG OUT
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.remove(getString(R.string.profile_text));
@@ -91,7 +89,7 @@ public class ProfileDetailsFragment extends Fragment {
             //if no text has been saved to the device before, check the server
             profileText = sharedPreferences.getString(getString(R.string.profile_text), null);
             if (profileText == null) {
-                profileText = User.getInstance().getProfileText();
+                profileText = MyUser.getInstance().getProfileText();
                 if (profileText == null) {
                     profileText = getString(R.string.default_profile_text);
                 }
@@ -115,8 +113,8 @@ public class ProfileDetailsFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d("loc", "onDATACHANCE");
-                Object profile_text = dataSnapshot.child("users").child(User.getInstance().getUID().toString()).child("profileText").getValue();
-                Object profile_name = dataSnapshot.child("users").child(User.getInstance().getUID().toString()).child("name").getValue();
+                Object profile_text = dataSnapshot.child("users").child(MyUser.getInstance().getUID().toString()).child("profileText").getValue();
+                Object profile_name = dataSnapshot.child("users").child(MyUser.getInstance().getUID().toString()).child("name").getValue();
                 //if no text is saved on the server, set the default text
                 if (profile_text == null)
                     profileText = getString(R.string.default_profile_text);

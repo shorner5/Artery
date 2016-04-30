@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,8 +28,8 @@ public class SettingsFragment extends PreferenceFragment {
         button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                User.getInstance().newInstance(getActivity().getApplicationContext());
-                SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                MyUser.getInstance().newInstance(getActivity().getApplicationContext());
+                SharedPreferences sharedPreferences = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
 
                 //set first launch
@@ -38,6 +37,7 @@ public class SettingsFragment extends PreferenceFragment {
 
                 //delete gallery files
                 String dir = sharedPreferences.getString(getString(R.string.directory), null);
+
                 if (dir != null) {
                     File directory = new File(dir);
                     for (File file : directory.listFiles()) {
@@ -45,16 +45,10 @@ public class SettingsFragment extends PreferenceFragment {
                     }
                 }
                 editor.clear();
-
-                //delete profile picture files
-                SharedPreferences.Editor pref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).edit();
-                pref.clear();
-                pref.apply();
-
                 editor.apply();
+
                 Intent intent = new Intent(getActivity(), FirstLaunchActivity.class);
                 startActivity(intent);
-                pref.apply();
                 return true;
             }
         });

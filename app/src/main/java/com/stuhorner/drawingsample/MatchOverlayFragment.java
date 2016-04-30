@@ -46,9 +46,12 @@ public class MatchOverlayFragment extends DialogFragment {
         Button name = (Button) view.findViewById(R.id.match_name);
         Button viewProfile = (Button) view.findViewById(R.id.match_view_profile);
         String cardString = getArguments().getString("name");
-        String[] matchName = cardString.split(",");
-        name.setText(String.format(getResources().getString(R.string.send_message), matchName[0]));
-        viewProfile.setText(String.format(getResources().getString(R.string.match_view_profile), matchName[0]));
+        String[] matchName = null;
+        if (cardString != null && cardString.contains(",")) {
+            matchName = cardString.split(",");
+            name.setText(String.format(getResources().getString(R.string.send_message), matchName[0]));
+            viewProfile.setText(String.format(getResources().getString(R.string.match_view_profile), matchName[0]));
+        }
 
         Animation anim = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.slide_in);
         Animation anim2 = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.slide_in);

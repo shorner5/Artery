@@ -175,6 +175,7 @@ public class DrawFragment extends Fragment {
                 customView.onClickRedo();
                 break;
             case R.id.action_save:
+                //TODO: if connected to the internet
                 saveImage(true);
                 break;
             case R.id.action_brush:
@@ -218,12 +219,12 @@ public class DrawFragment extends Fragment {
         }
     }
 
-    private void saveImage(boolean toGallery) {
+    private String saveImage(boolean toGallery) {
         customView.setDrawingCacheEnabled(true);
-        customView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_AUTO);
+        customView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
         Bitmap bm = customView.getDrawingCache();
 
-        String path; File dir;
+        String path; File dir, file = null;
         if (toGallery) {
             path = Environment.getExternalStorageDirectory().getAbsolutePath();
             dir = new File(path + "/" + getString(R.string.app_name));
@@ -231,8 +232,7 @@ public class DrawFragment extends Fragment {
         else {
             ContextWrapper cw = new ContextWrapper(getActivity().getApplicationContext());
             dir = cw.getExternalFilesDir(null);
-            SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
+            SharedPreferences.Editor editor = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE).edit();
             editor.putString(getString(R.string.directory), dir.getAbsolutePath());
             editor.apply();
         }
@@ -244,10 +244,10 @@ public class DrawFragment extends Fragment {
             if (!dir.isDirectory() || !dir.exists()){
                 dir.mkdirs();
             }
-            File file = new File(dir, title);
+            file = new File(dir, title);
             FileOutputStream fOut = new FileOutputStream(file);
             bm.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-            //add to User's gallery
+            //add to MyUser's gallery
             if (!toGallery) {
                 BitmapUploadTask task = new BitmapUploadTask(BitmapUploadTask.ADD_TO_GALLERY);
                 task.execute(file.getAbsolutePath());
@@ -266,11 +266,11 @@ public class DrawFragment extends Fragment {
             Snackbar.make(customView, R.string.saved, Snackbar.LENGTH_SHORT).show();
         }
         customView.destroyDrawingCache();
+        return file.getAbsolutePath();
     }
 
     private void changeStroke() {
         toolbar_bottom.getMenu().findItem(R.id.action_brush).setIcon(R.drawable.ic_color);
-
         paletteMode = false;
 
         //isolate 5 circles, remove others
@@ -288,7 +288,6 @@ public class DrawFragment extends Fragment {
         //initialize scale animations
         List<Float> animRadiiList = initAnimList();
         for (int i = 0; i < radii.size(); i++) {
-            final int j = i;
             final RecyclerView.ViewHolder view = scrollPalette.findViewHolderForAdapterPosition(i);
 
             final ScaleAnimation scaleAnim= new ScaleAnimation(1, animRadiiList.get(i), 1, animRadiiList.get(i), Animation.RELATIVE_TO_SELF, .5f, Animation.RELATIVE_TO_SELF, .5f);
@@ -380,7 +379,7 @@ public class DrawFragment extends Fragment {
                 public boolean onMenuItemClick(MenuItem item) {
                     switch (item.getItemId()) {
                         case R.id.action_done:
-                            saveImage(false);
+                            MyUser.getInstance().setCard(saveImage(false));
                             getActivity().finish();
                             break;
                         case R.id.action_help:
