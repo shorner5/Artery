@@ -106,7 +106,7 @@
     <string name="help_title">Draw your first card</string>
     <string name="help_body">This is other user\'s first impression of you, and their first interaction with you. Get creative, and draw anything that represents you. </string>
     <string name="welcome_title">Welcome to Artery!</string>
-    <string name="welcome_body">Swipe right on the drawing if you like it, swipe left to pass on it. If they like your drawing too, you\'ll get a match, and a new friend! Swipe right from the edge and choose Chats to see all your friends.</string>
+    <string name="welcome_body">Swipe right on drawings you like. Swipe left on drawings you don\'t. A match occurs when you and the other person both like each other\'s drawings! To chat with matches, swipe right from the edge.</string>
 
     <string name="no_delete">Can\'t delete!</string>
     <string name="no_delete_body">You must have at least one drawing in your gallery so other users can see you. If you don\'t want other users to see you, you can turn off "Discoverable" in Settings.</string>

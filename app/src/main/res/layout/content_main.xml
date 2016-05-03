@@ -15,7 +15,8 @@
         android:layout_height="20dp"
         android:layout_marginBottom="5dp"
         android:src="@drawable/easel_top"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:id="@+id/imageView" />
 
     <ImageView
         android:id="@+id/bottomEasel"
@@ -79,6 +80,13 @@
                 />
 
         </LinearLayout>
+
+        <ProgressBar
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="166dp" />
 
     </RelativeLayout>
 

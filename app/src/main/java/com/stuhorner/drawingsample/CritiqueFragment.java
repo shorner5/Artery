@@ -3,12 +3,15 @@ package com.stuhorner.drawingsample;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -21,8 +24,14 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,10 +45,10 @@ public class CritiqueFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.content_main, container, false);
-        initData();
         flingContainer = (SwipeFlingAdapterView) view.findViewById(R.id.swipecards);
-        //adapter = new CardAdapter(getActivity().getApplicationContext(),users);
-        //flingContainer.setAdapter(adapter);
+        adapter = new CardAdapter(getActivity().getApplicationContext(),users);
+        flingContainer.setAdapter(adapter);
+        initData();
         yesButton = (ImageButton) view.findViewById(R.id.yes_button);
         noButton = (ImageButton) view.findViewById(R.id.no_button);
         handleCardSwipes();
@@ -80,7 +89,6 @@ public class CritiqueFragment extends Fragment {
             @Override
             public void onAdapterAboutToEmpty(int itemsInAdapter) {
                 initData();
-                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -178,7 +186,33 @@ public class CritiqueFragment extends Fragment {
     }
 
     private void initData() {
-        //UserDownloadTask task = new UserDownloadTask();
+        //UserDownloadTask task = new UserDownloadTask(adapter, flingContainer, users, getContext());
         //task.execute();
+        MainActivity.rootRef.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Query queryRef = MainActivity.rootRef.child("users").limitToFirst(1);
+                queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (CritiqueFragment.this.isVisible()) {
+                            OtherUser user = new OtherUser(getActivity().getApplicationContext());
+                            user.populateInitial(dataSnapshot.g);
+                            Log.d("filled user", "populateInitial");
+                            users.add(user);
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(FirebaseError error) {
+            }
+        });
     }
 }

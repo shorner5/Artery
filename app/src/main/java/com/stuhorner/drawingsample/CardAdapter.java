@@ -1,12 +1,18 @@
 package com.stuhorner.drawingsample;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,7 +20,6 @@ import java.util.List;
  */
 public class CardAdapter extends BaseAdapter {
     private List<OtherUser> users;
-    List<Integer> drawings, userNames, userAges;
     Context context;
     private static LayoutInflater inflater;
 
@@ -31,7 +36,7 @@ public class CardAdapter extends BaseAdapter {
 
     @Override
     public int getCount(){
-        return userNames.size();
+        return (users != null) ? users.size() : 0;
     }
 
     @Override
@@ -57,8 +62,10 @@ public class CardAdapter extends BaseAdapter {
         Holder holder = new Holder();
         holder.name = (TextView) view.findViewById(R.id.card_name);
         holder.img = (ImageView) view.findViewById(R.id.card_drawing);
-        holder.name.setText(String.format(context.getResources().getString(R.string.card_title), userNames.get(position), Integer.toString(userAges.get(position))));
-        holder.img.setImageResource(R.drawable.example_drawing);
+        if (users.size() > 0) {
+            holder.name.setText(String.format(context.getResources().getString(R.string.card_title), users.get(position).getName(), Integer.toString(users.get(position).getAge())));
+            holder.img.setImageResource(R.drawable.example_drawing);
+        }
 
         return view;
     }

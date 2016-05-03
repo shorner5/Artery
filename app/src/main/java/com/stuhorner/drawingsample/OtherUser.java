@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.design.widget.Snackbar;
 import android.util.Base64;
+import android.util.Log;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -41,17 +42,20 @@ public class OtherUser {
 
     public void populateInitial(final String UID) {
         this.UID = UID;
+        Log.d("UID:", UID);
         ref.child("users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.child("name").getValue() != null)
+                if (dataSnapshot.child("name").getValue() != null) {
+                    Log.d("name", dataSnapshot.child("name").toString());
                     setName(dataSnapshot.child("name").getValue().toString());
+                }
                 if (dataSnapshot.child("age").getValue() != null)
                     setAge(((Long) dataSnapshot.child("age").getValue()).intValue());
-                if (dataSnapshot.child("gallery").child("0").getValue() != null)
-                    setCard(dataSnapshot.child("gallery").child("0").getValue().toString());
-                if (dataSnapshot.child("gender").getValue() != null)
-                    setGender(((Long) dataSnapshot.child("gender").getValue()).intValue());
+                //if (dataSnapshot.child("gallery").child("0").getValue() != null)
+                    //setCard(dataSnapshot.child("gallery").child("0").getValue().toString());
+                //if (dataSnapshot.child("gender").getValue() != null)
+                    //setGender(((Long) dataSnapshot.child("gender").getValue()).intValue());
             }
 
             @Override
