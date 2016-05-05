@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -57,14 +58,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         new MyUser(this);
 
 
-        SharedPreferences pref = this.getSharedPreferences("data", MODE_PRIVATE);
+        SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+        Log.d("UID", pref.getString("UID", "null"));
         if (isFirstLaunch() || pref.getString("UID", null) == null) {
             clearSavedData();
             Intent intent = new Intent(getApplicationContext(), FirstLaunchActivity.class);
             startActivityForResult(intent, 1);
         }
         else {
-            MyUser.getInstance().populateUser(pref.getString("UID", null));
+            MyUser.getInstance().populateUser(pref.getString("UID", "73ddd595-1ee4-4503-b9ed-cc9d0fdd2c5f"));
         }
 
         Fragment fragment = new CritiqueFragment();

@@ -196,11 +196,11 @@ public class CritiqueFragment extends Fragment {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (CritiqueFragment.this.isVisible()) {
-                            OtherUser user = new OtherUser(getActivity().getApplicationContext());
-                            user.populateInitial(dataSnapshot.g);
+                            //OtherUser user = new OtherUser(getActivity().getApplicationContext());
+                            //user.populateInitial(dataSnapshot.g);
                             Log.d("filled user", "populateInitial");
-                            users.add(user);
-                            adapter.notifyDataSetChanged();
+                            //users.add(user);
+                            //adapter.notifyDataSetChanged();
                         }
                     }
 

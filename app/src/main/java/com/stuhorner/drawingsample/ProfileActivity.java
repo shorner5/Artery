@@ -185,11 +185,11 @@ public class ProfileActivity extends AppCompatActivity{
             selectedImage = data.getData();
             BitmapUploadTask task = new BitmapUploadTask(BitmapUploadTask.PROFILE_PICTURE, this);
             task.execute(getPathFromURI(selectedImage));
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 8;
+            Bitmap bitmap = BitmapFactory.decodeFile(getPathFromURI(selectedImage), options);
+            backdrop.setImageBitmap(bitmap);
         }
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 8;
-        Bitmap bitmap = BitmapFactory.decodeFile(getPathFromURI(selectedImage), options);
-        backdrop.setImageBitmap(bitmap);
     }
 
     private String getPathFromURI(Uri uri) {

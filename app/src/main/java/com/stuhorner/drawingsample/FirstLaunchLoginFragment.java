@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,6 +49,7 @@ public class FirstLaunchLoginFragment extends Fragment {
                             MyUser.getInstance().populateUser(authData.getUid());
                             SharedPreferences.Editor pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE).edit();
                             pref.putString("UID", MyUser.getInstance().getUID());
+                            Log.d("UID", MyUser.getInstance().getUID());
                             pref.apply();
                             getActivity().finish();
                         }
