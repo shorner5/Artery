@@ -34,6 +34,10 @@ public class CardAdapter extends BaseAdapter {
         return position;
     }
 
+    public String getUID(int position) {
+        return users.get(position).getUID();
+    }
+
     @Override
     public int getCount(){
         return (users != null) ? users.size() : 0;

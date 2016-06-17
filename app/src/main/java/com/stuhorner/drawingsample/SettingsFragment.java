@@ -32,9 +32,6 @@ public class SettingsFragment extends PreferenceFragment {
                 SharedPreferences sharedPreferences = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
 
-                //set first launch
-                editor.putBoolean("isFirstLaunch", true);
-
                 //delete gallery files
                 String dir = sharedPreferences.getString(getString(R.string.directory), null);
 

@@ -29,6 +29,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
+import com.firebase.geofire.GeoFire;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
 import java.io.ByteArrayOutputStream;
@@ -40,6 +41,7 @@ public class CritiqueFragment extends Fragment {
     List<OtherUser> users = new ArrayList<>();
     CardAdapter adapter;
     ImageButton yesButton, noButton;
+    GeoFire geoFire = new GeoFire(new Firebase("https://artery.firebaseio.com"));
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
@@ -121,11 +123,11 @@ public class CritiqueFragment extends Fragment {
         flingContainer.setOnItemClickListener(new SwipeFlingAdapterView.OnItemClickListener() {
             @Override
             public void onItemClicked(int position, Object dataObject) {
-                /*Intent intent = new Intent(getActivity(), ProfileActivity.class);
-                intent.putExtra(MainActivity.PERSON_NAME,);
+                Intent intent = new Intent(getActivity(), ProfileActivity.class);
+                intent.putExtra("UID", adapter.getUID(flingContainer.getFirstVisiblePosition()));
                 intent.putExtra("buttons_off", false);
                 startActivityForResult(intent, 1);
-                getActivity().overridePendingTransition(R.anim.slide_in, R.anim.fade_out);*/
+                getActivity().overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
             }
         });
     }
@@ -186,33 +188,6 @@ public class CritiqueFragment extends Fragment {
     }
 
     private void initData() {
-        //UserDownloadTask task = new UserDownloadTask(adapter, flingContainer, users, getContext());
-        //task.execute();
-        MainActivity.rootRef.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Query queryRef = MainActivity.rootRef.child("users").limitToFirst(1);
-                queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (CritiqueFragment.this.isVisible()) {
-                            //OtherUser user = new OtherUser(getActivity().getApplicationContext());
-                            //user.populateInitial(dataSnapshot.g);
-                            Log.d("filled user", "populateInitial");
-                            //users.add(user);
-                            //adapter.notifyDataSetChanged();
-                        }
-                    }
 
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-                    }
-                });
-            }
-
-            @Override
-            public void onCancelled(FirebaseError error) {
-            }
-        });
     }
 }

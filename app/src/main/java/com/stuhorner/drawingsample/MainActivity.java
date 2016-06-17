@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -26,7 +27,11 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 
 import com.appyvet.rangebar.RangeBar;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
+import com.firebase.geofire.GeoFire;
 
 import java.io.File;
 
@@ -34,14 +39,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     final static int MIN_AGE_ALLOWED = 18;
     final static int HIDE_MENU = 3;
     final static int ON_CRITIQUE = 1, ON_DRAWING = 2;
-    boolean isMaleOn = true, isFemaleOn = true, near_me = true;
+    boolean isMaleOn = true, isFemaleOn = true;
+    public static boolean near_me = false;
     int minAge = 18, maxAge = 70;
     int page = ON_CRITIQUE;
     DrawerLayout drawer;
     NavigationView navigationView, filterView;
     public static Firebase rootRef;
-
-
     public final static String PERSON_NAME = "com.stuhorner.buckit.PERSON_NAME";
 
     @Override
@@ -60,13 +64,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
         Log.d("UID", pref.getString("UID", "null"));
-        if (isFirstLaunch() || pref.getString("UID", null) == null) {
+        if (pref.getString("UID", null) == null) {
             clearSavedData();
             Intent intent = new Intent(getApplicationContext(), FirstLaunchActivity.class);
             startActivityForResult(intent, 1);
         }
         else {
-            MyUser.getInstance().populateUser(pref.getString("UID", "73ddd595-1ee4-4503-b9ed-cc9d0fdd2c5f"));
+            MyUser.getInstance().populateUser(pref.getString("UID", pref.getString("UID", null)));
         }
 
         Fragment fragment = new CritiqueFragment();
@@ -100,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         filterView = (NavigationView) findViewById(R.id.filter_view);
         initFilter();
         initNavHeader();
+        new MyLocationListener(this, (ImageButton)findViewById(R.id.filter_near_me), (ImageButton)findViewById(R.id.filter_public));
     }
 
     @Override
@@ -137,15 +142,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 invalidateOptionsMenu();
             }
         }
-    }
-
-    private Boolean isFirstLaunch() {
-        SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
-        boolean isFirstLaunch = pref.getBoolean("isFirstLaunch", true);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putBoolean("isFirstLaunch", false);
-        editor.apply();
-        return isFirstLaunch;
     }
 
     @Override
@@ -269,15 +265,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initNavHeader() {
         navigationView.getHeaderView(0).setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View view) {
-               final Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-               intent.putExtra("editable", true);
-               intent.putExtra("buttons_off", true);
-               intent.putExtra(PERSON_NAME, MyUser.getInstance().getName());
-               startActivity(intent);
-           }
-       });
+            @Override
+            public void onClick(View view) {
+                final Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                intent.putExtra("editable", true);
+                intent.putExtra("buttons_off", true);
+                intent.putExtra(PERSON_NAME, MyUser.getInstance().getName());
+                startActivity(intent);
+            }
+        });
     }
 
     private void initFilter() {
@@ -297,8 +293,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void initLocation() {
         final ImageButton near_me = (ImageButton) findViewById(R.id.filter_near_me);
         final ImageButton all = (ImageButton) findViewById(R.id.filter_public);
-        near_me.setColorFilter(getResources().getColor(R.color.colorPrimary));
-        all.setColorFilter(getResources().getColor(R.color.lightGray));
+        near_me.setColorFilter(getResources().getColor(R.color.lightGray));
+        all.setColorFilter(getResources().getColor(R.color.colorPrimary));
         addAnimation(near_me);
         addAnimation(all);
     }
@@ -338,7 +334,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void handleFilterButtonPress(ImageButton button) {
+    private void handleFilterButtonPress(final ImageButton button) {
         int id = button.getId();
         switch (id){
             case R.id.filter_male:
@@ -361,9 +357,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.filter_near_me:
                 if (!near_me) {
-                    button.setColorFilter(getResources().getColor(R.color.colorPrimary));
-                    ((ImageButton)findViewById(R.id.filter_public)).setColorFilter(getResources().getColor(R.color.lightGray));
-                    near_me = true;
+                    if (MyLocationListener.hasLocation) {
+                        button.setColorFilter(getResources().getColor(R.color.colorPrimary));
+                        ((ImageButton) findViewById(R.id.filter_public)).setColorFilter(getResources().getColor(R.color.lightGray));
+                        near_me = true;
+                    }
+                    else {
+                        new MyLocationListener(this, button, (ImageButton) findViewById(R.id.filter_public));
+                    }
                 }
                 break;
             case R.id.filter_public:
