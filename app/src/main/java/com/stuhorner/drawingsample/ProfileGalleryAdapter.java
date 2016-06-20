@@ -3,6 +3,8 @@ package com.stuhorner.drawingsample;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,12 +24,13 @@ public class ProfileGalleryAdapter extends RecyclerView.Adapter<ProfileGalleryAd
 
     public ProfileGalleryAdapter(List<String> mListData) {
         this.mListData = mListData;
-        fillImages();
+        convertBase64ToBitmap();
     }
 
-    private void fillImages() {
-        for (String uri : mListData) {
-            Bitmap bm = BitmapFactory.decodeFile(uri);
+    private void convertBase64ToBitmap() {
+        for (String base64 : mListData) {
+            byte[] bytes = Base64.decode(base64.getBytes(), Base64.DEFAULT);
+            Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             images.add(bm);
         }
     }

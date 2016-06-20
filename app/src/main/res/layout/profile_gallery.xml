@@ -16,6 +16,7 @@
     <ProgressBar
         android:layout_width="60dp"
         android:layout_height="60dp"
+        android:visibility="invisible"
         android:id="@+id/profile_gallery_loading"
         android:layout_gravity="center"/>
 

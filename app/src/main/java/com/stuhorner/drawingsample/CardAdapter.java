@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,16 +23,18 @@ public class CardAdapter extends BaseAdapter {
     private List<OtherUser> users;
     Context context;
     private static LayoutInflater inflater;
+    ProgressBar progressBar;
 
-    public CardAdapter(Context context, List<OtherUser> users) {
+    public CardAdapter(Context context, List<OtherUser> users, ProgressBar progressBar) {
         this.users = users;
         this.context = context;
+        this.progressBar = progressBar;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
     public Object getItem(int position) {
-        return position;
+        return users.get(position);
     }
 
     public String getUID(int position) {
@@ -68,7 +71,7 @@ public class CardAdapter extends BaseAdapter {
         holder.img = (ImageView) view.findViewById(R.id.card_drawing);
         if (users.size() > 0) {
             holder.name.setText(String.format(context.getResources().getString(R.string.card_title), users.get(position).getName(), Integer.toString(users.get(position).getAge())));
-            holder.img.setImageResource(R.drawable.example_drawing);
+            holder.img.setImageBitmap(users.get(position).getCard());
         }
 
         return view;

@@ -1,16 +1,23 @@
 package com.stuhorner.drawingsample;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public class SettingsFragment extends PreferenceFragment {
     @Override
@@ -21,11 +28,11 @@ public class SettingsFragment extends PreferenceFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater,container,savedInstanceState);
+        final View view = super.onCreateView(inflater, container, savedInstanceState);
         view.setBackgroundColor(getResources().getColor(android.R.color.white));
 
-        Preference button = findPreference(getString(R.string.logout));
-        button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        Preference logout = findPreference(getString(R.string.logout));
+        logout.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 MyUser.getInstance().newInstance(getActivity().getApplicationContext());
@@ -44,9 +51,21 @@ public class SettingsFragment extends PreferenceFragment {
                 editor.clear();
                 editor.apply();
 
+                MyLocationListener.hasLocation = false;
+
                 Intent intent = new Intent(getActivity(), FirstLaunchActivity.class);
                 startActivity(intent);
                 return true;
+            }
+        });
+        Preference clearSeen = findPreference(getString(R.string.clear_seen));
+        clearSeen.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                MainActivity.rootRef.child("users").child(MyUser.getInstance().getUID()).child("swiped").setValue(null);
+                Snackbar.make(view, "Reset Swipes. This does not affect your matches.", Snackbar.LENGTH_SHORT).show();
+                MyUser.getInstance().clearSwiped();
+                return false;
             }
         });
         return view;

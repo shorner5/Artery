@@ -10,12 +10,17 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -40,15 +45,36 @@ public class ProfileGalleryFragment extends Fragment {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
         drawings = new ArrayList<>();
-        adapter = new ProfileGalleryAdapter(drawings);
         ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.profile_gallery_loading);
         initData(recyclerView, progressBar);
         return view;
     }
 
-    private void initData(RecyclerView recyclerView, ProgressBar progressBar) {
-        progressBar.setVisibility(View.VISIBLE);
-        ProfileGalleryInitTask task = new ProfileGalleryInitTask(getActivity(), recyclerView, drawings, adapter, progressBar);
-        task.execute();
+    private void initData(final RecyclerView recyclerView, final ProgressBar progressBar) {
+        if (getActivity().getIntent().getBooleanExtra("editable", false)) {
+            drawings = (ArrayList<String>) MyUser.getInstance().getGallery();
+            adapter = new ProfileGalleryAdapter(drawings);
+            recyclerView.setAdapter(adapter);
+        }
+        else {
+            progressBar.setVisibility(View.VISIBLE);
+            MainActivity.rootRef.child("users").child(getActivity().getIntent().getStringExtra("UID")).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.child("gallery").getValue() != null) {
+                        drawings = ((ArrayList<String>) dataSnapshot.child("gallery").getValue());
+                        adapter = new ProfileGalleryAdapter(drawings);
+                        recyclerView.setAdapter(adapter);
+                        progressBar.setVisibility(View.INVISIBLE);
+                    }
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
+
+        }
     }
 }

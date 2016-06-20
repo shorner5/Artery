@@ -3,6 +3,7 @@ package com.stuhorner.drawingsample;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.support.design.widget.Snackbar;
 import android.util.Base64;
 import android.util.Log;
@@ -14,6 +15,8 @@ import com.firebase.client.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -38,6 +41,10 @@ public class MyUser {
     private Object UID;
     private List<String> gallery = new ArrayList<>();
     private String card;
+    private Location location;
+    private HashSet<String> right = new HashSet<>();
+    private HashSet<String> swiped = new HashSet<>();
+    private HashSet<String> matchedUsers = new HashSet<>();
 
     public MyUser() {}
 
@@ -72,7 +79,16 @@ public class MyUser {
                 if (dataSnapshot.child("gallery").getValue() != null)
                     instance.setGallery((List<String>) dataSnapshot.child("gallery").getValue());
                 else {
-                    gallery = new ArrayList<String>();
+                    gallery = new ArrayList<>();
+                }
+                if (dataSnapshot.child("right").getValue() != null) {
+                    instance.setRight((ArrayList<String>)dataSnapshot.child("right").getValue());
+                }
+                if (dataSnapshot.child("swiped").getValue() != null) {
+                    instance.setSwiped((ArrayList<String>) dataSnapshot.child("swiped").getValue());
+                }
+                if (dataSnapshot.child("matchedUsers").getValue() != null) {
+                    instance.setMatchedUsers((ArrayList<String>) dataSnapshot.child("matchedUsers").getValue());
                 }
             }
 
@@ -110,7 +126,12 @@ public class MyUser {
     }
 
     public String getUID() {
-        return UID.toString();
+        if (UID != null) {
+            return UID.toString();
+        }
+        else {
+            return null;
+        }
     }
 
     public int getGender() {
@@ -184,6 +205,14 @@ public class MyUser {
         ref.child("users").child(getUID()).child("card").setValue(card);
     }
 
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
     public void addToGallery(String drawing) {
         gallery.add(drawing);
         ref.child("users").child(getUID()).child("gallery").setValue(gallery);
@@ -192,5 +221,50 @@ public class MyUser {
     public void removeFromGallery(int i) {
         gallery.remove(i);
         ref.child("users").child(getUID()).child("gallery").setValue(gallery);
+    }
+
+    public void swipeRight(String UID) {
+        right.add(UID);
+        ref.child("users").child(getUID()).child("right").setValue(right);
+    }
+
+    public void swiped(String UID) {
+        swiped.add(UID);
+        ref.child("users").child(getUID()).child("swiped").setValue(swiped);
+    }
+
+    public boolean seen(String UID) {
+        return (swiped.contains(UID));
+    }
+
+    public void setRight(ArrayList<String> right) {
+        for (String UID : right) {
+            this.right.add(UID);
+        }
+    }
+
+    public void setSwiped(ArrayList<String> swiped) {
+        for (String UID : swiped) {
+            this.swiped.add(UID);
+        }
+    }
+
+    public void clearSwiped() {
+        this.swiped.clear();
+    }
+
+    public void addMatch(String UID) {
+        matchedUsers.add(UID);
+        ref.child("users").child(getUID()).child("matchedUsers").setValue(matchedUsers);
+    }
+
+    public void setMatchedUsers(ArrayList<String> matchedUsers) {
+        for (String UID : matchedUsers) {
+            this.matchedUsers.add(UID);
+        }
+    }
+
+    public HashSet<String> getSwiped() {
+        return swiped;
     }
 }

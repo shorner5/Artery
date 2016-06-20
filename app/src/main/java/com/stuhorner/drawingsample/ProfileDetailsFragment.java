@@ -24,23 +24,22 @@ import com.firebase.client.ValueEventListener;
  * Created by Stu on 3/23/2016.
  */
 public class ProfileDetailsFragment extends Fragment {
-
+    String UID;
     TextView textView;
     EditText editText;
-    String profileText = "ERROR";
+    String profileText;
     ProgressBar bar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View view = inflater.inflate(R.layout.profile_details, container, false);
+        UID = getActivity().getIntent().getStringExtra("UID");
         textView = (TextView) view.findViewById(R.id.p_text);
         editText = (EditText) view.findViewById(R.id.p_edit_text);
         bar = (ProgressBar) view.findViewById(R.id.p_progress_bar);
         textView.setMovementMethod(new ScrollingMovementMethod());
         setHasOptionsMenu(true);
         initData();
-        textView.setText(profileText);
-        editText.setText(profileText);
         return view;
     }
 
@@ -71,60 +70,34 @@ public class ProfileDetailsFragment extends Fragment {
         editor.apply();
 
         MyUser.getInstance().setProfileText(textView.getText().toString());
-        //TODO: save to interwebs
     }
 
 
     private void initData(){
-        //bar.setVisibility(View.VISIBLE);
         //if user's profile
         if (getActivity().getIntent().getBooleanExtra("editable", false)) {
-            //get text saved to the device
-            SharedPreferences sharedPreferences = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
-            //TODO: PUT THIS IN LOG OUT
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.remove(getString(R.string.profile_text));
-            editor.apply();
-
-            //if no text has been saved to the device before, check the server
-            profileText = sharedPreferences.getString(getString(R.string.profile_text), null);
-            if (profileText == null) {
-                profileText = MyUser.getInstance().getProfileText();
-                if (profileText == null) {
-                    profileText = getString(R.string.default_profile_text);
-                }
+            profileText = MyUser.getInstance().getProfileText();
+            if (profileText != null) {
+                textView.setText(profileText);
+                bar.setVisibility(View.INVISIBLE);
                 return;
             }
         }
-        else {
-            profileText = "Lorem ipsum dolor sit amet, eam an sumo erant, mei feugiat aliquando ne, dico graeco audiam ea pri. No mea purto elit clita. Sea in saepe quando. Doctus inermis no per, ornatus volutpat hendrerit quo cu, ea malis saepe offendit pri.\n" +
-                    "\n" +
-                    "No sit homero labitur evertitur, mel ei vulputate appellantur. Ex mei stet dolor. Meis verear vulputate usu no. Ad erat sadipscing qui. Eum eius nusquam lucilius in, sanctus invidunt scribentur ei duo.\n" +
-                    "\n" +
-                    "Dico definitionem at vis, duo id feugiat fastidii, modo alterum ea mea. Ignota scriptorem qui cu, at posse epicurei usu, sit tation omittam id. Cu quidam pertinax theophrastus quo. Ad solet meliore phaedrum mel, nam iracundia euripidis id, zril aeterno cum in. Vel evertitur theophrastus cu, ius erat error electram ad.";
-        }
-
-        bar.setVisibility(View.INVISIBLE);
+        checkForText();
     }
 
     private void checkForText() {
         Log.d("loc", "checkforText");
-        MainActivity.rootRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        MainActivity.rootRef.child("users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d("loc", "onDATACHANCE");
-                Object profile_text = dataSnapshot.child("users").child(MyUser.getInstance().getUID().toString()).child("profileText").getValue();
-                Object profile_name = dataSnapshot.child("users").child(MyUser.getInstance().getUID().toString()).child("name").getValue();
+                Object profile_text = dataSnapshot.child("profileText").getValue();
                 //if no text is saved on the server, set the default text
                 if (profile_text == null)
                     profileText = getString(R.string.default_profile_text);
                 else
                     profileText = profile_text.toString();
-                //save to the device
-                SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
-                editor.putString(getString(R.string.profile_text), profileText);
-                editor.putString(getString(R.string.profile_name), profile_name.toString());
-                editor.apply();
 
                 textView.setText(profileText);
                 editText.setText(profileText);

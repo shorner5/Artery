@@ -27,19 +27,21 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 
 /**
  * Created by Stu on 1/1/2016.
  */
 public class ProfileActivity extends AppCompatActivity{
-    String person_name;
-    ImageButton noButton, yesButton;
+    String UID;
     Button changeProfilePic;
     Toolbar toolbar;
     ImageView backdrop;
     public final static int RESULT_NO = 1, RESULT_YES = 2, GET_FROM_GALLERY = 3;
-    int result;
+    int result = 0;
     boolean buttons_on = true;
     boolean edittable = false, editting = false;
 
@@ -48,22 +50,23 @@ public class ProfileActivity extends AppCompatActivity{
         setContentView(R.layout.activity_profile);
         Firebase.setAndroidContext(this);
 
-        person_name = getIntent().getStringExtra(MainActivity.PERSON_NAME);
-
+        UID = getIntent().getStringExtra("UID");
         buttons_on = getIntent().getBooleanExtra("buttons_off", false);
         edittable = getIntent().getBooleanExtra("editable", false);
-        result = 0;
 
         setupToolbar();
         setupViewPager();
         setupCollapsingToolbar();
 
-        noButton = (ImageButton)findViewById(R.id.p_no_button);
-        yesButton = (ImageButton)findViewById(R.id.p_yes_button);
+        ImageButton noButton = (ImageButton)findViewById(R.id.p_no_button);
+        ImageButton yesButton = (ImageButton)findViewById(R.id.p_yes_button);
         changeProfilePic = (Button)findViewById(R.id.change_picture);
         backdrop = (ImageView) findViewById(R.id.backdrop);
         if (edittable) {
-            getMyProfilePicture();
+            initMyProfile();
+        }
+        else {
+            initData();
         }
         setupEdit();
 
@@ -72,7 +75,8 @@ public class ProfileActivity extends AppCompatActivity{
             yesButton.setVisibility(View.INVISIBLE);
         }
         else {
-            buttonListeners();
+            buttonListeners(yesButton);
+            buttonListeners(noButton);
         }
     }
 
@@ -107,41 +111,23 @@ public class ProfileActivity extends AppCompatActivity{
         return super.onOptionsItemSelected(item);
     }
 
-    private void getMyProfilePicture() {
+    private void initMyProfile() {
+        if (MyUser.getInstance().getName() != null && getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(MyUser.getInstance().getName());
+        }
         if (MyUser.getInstance().getProfilePicture() != null) {
             String profilePicture = MyUser.getInstance().getProfilePicture();
             byte[] bytes = Base64.decode(profilePicture.getBytes(), Base64.DEFAULT);
             Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             backdrop.setImageBitmap(bm);
-
-            //first time, save picture to device
-            SharedPreferences.Editor editor = getSharedPreferences("data", Context.MODE_PRIVATE).edit();
-            editor.putString(getString(R.string.profile_picture), MyUser.getInstance().getProfilePicturePath());
-            editor.apply();
         }
         else {
-            SharedPreferences sharedPref = getSharedPreferences("data", Context.MODE_PRIVATE);
-            String bitmapURL = sharedPref.getString(getString(R.string.profile_picture), null);
-            if (bitmapURL != null) {
-                try {
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inSampleSize = 8;
-                    Bitmap bitmap = BitmapFactory.decodeFile(bitmapURL, options);
-                    backdrop.setImageBitmap(bitmap);
-                } catch (Exception e) {
-                    backdrop.setImageResource(R.drawable.example_profilepic);
-                }
-            }
-            else {
-                backdrop.setImageResource(R.drawable.example_profilepic);
-
-            }
+            initData();
         }
     }
     private void setupToolbar() {
         toolbar = (Toolbar)findViewById(R.id.p_toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(person_name);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.ic_back));
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -180,7 +166,7 @@ public class ProfileActivity extends AppCompatActivity{
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Uri selectedImage = null;
+        Uri selectedImage;
         if (requestCode == GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
             selectedImage = data.getData();
             BitmapUploadTask task = new BitmapUploadTask(BitmapUploadTask.PROFILE_PICTURE, this);
@@ -217,22 +203,22 @@ public class ProfileActivity extends AppCompatActivity{
             overridePendingTransition(R.anim.fade_in, R.anim.slide_out);
     }
 
-    private void buttonListeners(){
+    private void buttonListeners(final ImageButton button) {
         final Animation scaleDownYes = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.translate_down);
         scaleDownYes.setFillAfter(true);
-        final Animation scaleUpYes = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.translate_up);
+        final Animation scaleUpYes = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.translate_up);
         scaleUpYes.setFillAfter(true);
 
-        yesButton.setOnTouchListener(new View.OnTouchListener() {
+        button.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 switch (motionEvent.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        yesButton.startAnimation(scaleDownYes);
+                        button.startAnimation(scaleDownYes);
                         break;
                     case MotionEvent.ACTION_UP:
-                        yesButton.startAnimation(scaleUpYes);
-                        result = RESULT_YES;
+                        button.startAnimation(scaleUpYes);
+                        handleButtonPress(button);
                         onBackPressed();
                         break;
                 }
@@ -240,25 +226,40 @@ public class ProfileActivity extends AppCompatActivity{
             }
         });
 
-        final Animation scaleDownNo = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.translate_down);
-        scaleDownNo.setFillAfter(true);
-        final Animation scaleUpNo = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.translate_up);
-        scaleUpNo.setFillAfter(true);
+    }
 
-        noButton.setOnTouchListener(new View.OnTouchListener() {
+    private void handleButtonPress(ImageButton button) {
+        if (button.getId() == R.id.p_yes_button) {
+            result = RESULT_YES;
+        }
+        else {
+            result = RESULT_NO;
+        }
+    }
+
+    private void initData() {
+        MainActivity.rootRef.child("users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                switch (motionEvent.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN:
-                        noButton.startAnimation(scaleDownNo);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        noButton.startAnimation(scaleUpNo);
-                        result = RESULT_NO;
-                        onBackPressed();
-                        break;
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().setTitle(dataSnapshot.child("name").getValue().toString());
                 }
-                return false;
+                Object profilePicture = dataSnapshot.child("profilePicture").getValue();
+                Bitmap bm;
+                if (profilePicture != null) {
+                    byte[] bytes = Base64.decode(profilePicture.toString().getBytes(), Base64.DEFAULT);
+                    bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                }
+                else {
+                    bm = BitmapFactory.decodeResource(getResources(),R.drawable.example_profilepic);
+                }
+
+                backdrop.setImageBitmap(bm);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
             }
         });
     }

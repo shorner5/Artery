@@ -24,6 +24,7 @@ import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -69,6 +70,7 @@ public class FirstLaunchCreateLoginFragment extends Fragment {
                                 public void onAuthenticated(AuthData authData) {
                                     MyUser.getInstance().setUID(result.get("uid"));
                                     //save UID
+                                    rootRef.child("user_index").push().setValue(result.get("uid"));
                                     SharedPreferences.Editor pref = getActivity().getSharedPreferences("UID", Context.MODE_PRIVATE).edit();
                                     pref.putString("UID", MyUser.getInstance().getUID());
                                     pref.apply();

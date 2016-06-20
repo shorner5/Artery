@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -51,6 +52,7 @@ public class FirstLaunchLoginFragment extends Fragment {
                             pref.putString("UID", MyUser.getInstance().getUID());
                             Log.d("UID", MyUser.getInstance().getUID());
                             pref.apply();
+                            getActivity().setResult(1);
                             getActivity().finish();
                         }
 

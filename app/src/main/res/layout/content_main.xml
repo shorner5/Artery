@@ -52,6 +52,26 @@
             android:background="@drawable/gradient"
             />
 
+        <ProgressBar
+            android:id="@+id/critique_progress"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="166dp" />
+
+        <TextView
+            android:id="@+id/outOfUsers"
+            android:visibility="invisible"
+            android:text="@string/out_of_users"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="166dp"
+            />
+
         <LinearLayout
             android:id="@+id/m_linearlayout"
             android:layout_width="match_parent"
@@ -81,12 +101,6 @@
 
         </LinearLayout>
 
-        <ProgressBar
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="166dp" />
 
     </RelativeLayout>
 

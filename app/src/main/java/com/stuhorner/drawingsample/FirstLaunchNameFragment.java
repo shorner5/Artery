@@ -121,7 +121,6 @@ public class FirstLaunchNameFragment extends Fragment {
                         break;
                     case MotionEvent.ACTION_UP:
                         button.startAnimation(scaleUp);
-                        Log.d("her", "heeere");
                         FirstLaunchActivity.mPager.setCurrentItem(FirstLaunchActivity.mPager.getCurrentItem() - 1);
                         break;
                 }

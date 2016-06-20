@@ -16,7 +16,10 @@
             android:title="@string/pref_message_notif"
             android:defaultValue="true"/>
     </PreferenceCategory>
-    <Preference android:title="Log out"
+    <Preference android:title="@string/clear_seen"
+        android:key="@string/clear_seen"
+        android:selectable="true" />
+    <Preference android:title="@string/logout"
         android:key="@string/logout"
         android:selectable="true" />
 </PreferenceScreen>

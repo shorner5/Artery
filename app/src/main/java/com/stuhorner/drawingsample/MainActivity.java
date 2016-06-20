@@ -27,11 +27,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 
 import com.appyvet.rangebar.RangeBar;
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
-import com.firebase.geofire.GeoFire;
 
 import java.io.File;
 
@@ -39,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     final static int MIN_AGE_ALLOWED = 18;
     final static int HIDE_MENU = 3;
     final static int ON_CRITIQUE = 1, ON_DRAWING = 2;
-    boolean isMaleOn = true, isFemaleOn = true;
+    boolean isMaleOn, isFemaleOn;
     public static boolean near_me = false;
     int minAge = 18, maxAge = 70;
     int page = ON_CRITIQUE;
@@ -47,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NavigationView navigationView, filterView;
     public static Firebase rootRef;
     public final static String PERSON_NAME = "com.stuhorner.buckit.PERSON_NAME";
+    CritiqueFragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,8 +58,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //create MyUser instance
         new MyUser(this);
 
-
         SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean("near_me", true);
+        editor.commit();
         Log.d("UID", pref.getString("UID", "null"));
         if (pref.getString("UID", null) == null) {
             clearSavedData();
@@ -73,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             MyUser.getInstance().populateUser(pref.getString("UID", pref.getString("UID", null)));
         }
 
-        Fragment fragment = new CritiqueFragment();
+        fragment = new CritiqueFragment();
         android.support.v4.app.FragmentManager fragmentManager= getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -82,6 +81,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             @Override
             public void onDrawerClosed(View view) {
+                if (view.getId() == R.id.filter_view) {
+                    fragment = new CritiqueFragment();
+                    android.support.v4.app.FragmentManager fragmentManager= getSupportFragmentManager();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                }
                 super.onDrawerClosed(view);
                 if (page == ON_DRAWING) {
                     drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -89,6 +93,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             @Override
             public void onDrawerOpened(View drawerView) {
+                if (drawerView.getId() == R.id.filter_view) {
+                    initFilter();
+                }
                 drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, findViewById(R.id.nav_view));
             }
             @Override
@@ -104,13 +111,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         filterView = (NavigationView) findViewById(R.id.filter_view);
         initFilter();
         initNavHeader();
-        new MyLocationListener(this, (ImageButton)findViewById(R.id.filter_near_me), (ImageButton)findViewById(R.id.filter_public));
+
+        //if (pref.getBoolean("near_me", true)) {
+            new MyLocationListener(this, (ImageButton) findViewById(R.id.filter_near_me), (ImageButton) findViewById(R.id.filter_public), fragment);
+        //}
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d("onActivityResult", Integer.toString(requestCode));
         if (requestCode == 1) {
+
+            new MyLocationListener(this, (ImageButton)findViewById(R.id.filter_near_me), (ImageButton)findViewById(R.id.filter_public), fragment);
+
             final android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(this, R.style.AppTheme_PopupOverlay);
             alertDialogBuilder.setTitle(R.string.welcome_title);
             alertDialogBuilder.setMessage(R.string.welcome_body).
@@ -246,7 +260,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
         navigationView.setCheckedItem(R.id.nav_settings);
-        final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -270,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 final Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                 intent.putExtra("editable", true);
                 intent.putExtra("buttons_off", true);
-                intent.putExtra(PERSON_NAME, MyUser.getInstance().getName());
+                intent.putExtra("UID", MyUser.getInstance().getUID());
                 startActivity(intent);
             }
         });
@@ -283,23 +296,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initSex() {
+        SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+        isMaleOn = pref.getBoolean("isMaleOn", true);
+        isFemaleOn = pref.getBoolean("isFemaleOn", true);
         final ImageButton male = (ImageButton) findViewById(R.id.filter_male);
         final ImageButton female = (ImageButton) findViewById(R.id.filter_female);
-        male.setColorFilter(getResources().getColor(R.color.colorPrimary));
-        female.setColorFilter(getResources().getColor(R.color.colorPrimary));
+        addColor(male, isMaleOn);
+        addColor(female, isFemaleOn);
         addAnimation(male);
         addAnimation(female);
     }
     private void initLocation() {
-        final ImageButton near_me = (ImageButton) findViewById(R.id.filter_near_me);
+        SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+        near_me = pref.getBoolean("near_me", false);
+        final ImageButton near_me_button = (ImageButton) findViewById(R.id.filter_near_me);
         final ImageButton all = (ImageButton) findViewById(R.id.filter_public);
-        near_me.setColorFilter(getResources().getColor(R.color.lightGray));
-        all.setColorFilter(getResources().getColor(R.color.colorPrimary));
-        addAnimation(near_me);
+        addColor(near_me_button, near_me);
+        addColor(all, !near_me);
+        addAnimation(near_me_button);
         addAnimation(all);
     }
+
+    private void addColor(ImageButton button, boolean on) {
+        if (on) {
+            button.setColorFilter(getResources().getColor(R.color.colorPrimary));
+        }
+        else {
+            button.setColorFilter(getResources().getColor(R.color.lightGray));
+        }
+    }
+
     private void initSlider() {
+        SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+        final SharedPreferences.Editor editor = pref.edit();
         RangeBar rangeBar = (RangeBar) findViewById(R.id.rangeBar);
+        rangeBar.setRangePinsByIndices(pref.getInt("minAge", 18) - MIN_AGE_ALLOWED, pref.getInt("maxAge", 70) - MIN_AGE_ALLOWED);
         rangeBar.setOnRangeBarChangeListener(new RangeBar.OnRangeBarChangeListener() {
             @Override
             public void onRangeChangeListener(RangeBar rangeBar, int leftPinIndex,
@@ -307,6 +338,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                               String leftPinValue, String rightPinValue) {
                 minAge = leftPinIndex + MIN_AGE_ALLOWED;
                 maxAge = rightPinIndex + MIN_AGE_ALLOWED;
+                editor.putInt("minAge", minAge);
+                editor.putInt("maxAge", maxAge);
+                editor.apply();
             }
         });
     }
@@ -335,25 +369,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void handleFilterButtonPress(final ImageButton button) {
+        SharedPreferences.Editor pref = getSharedPreferences("data", MODE_PRIVATE).edit();
         int id = button.getId();
         switch (id){
             case R.id.filter_male:
-                if (isMaleOn) {
-                    button.setColorFilter(getResources().getColor(R.color.lightGray));
-                    isMaleOn = false;
-                } else {
-                    button.setColorFilter(getResources().getColor(R.color.colorPrimary));
-                    isMaleOn = true;
-                }
+                isMaleOn = (!isMaleOn);
+                pref.putBoolean("isMaleOn", isMaleOn);
+                pref.apply();
+                addColor(button, isMaleOn);
                 break;
             case R.id.filter_female:
-                if (isFemaleOn) {
-                    button.setColorFilter(getResources().getColor(R.color.lightGray));
-                    isFemaleOn = false;
-                } else {
-                    button.setColorFilter(getResources().getColor(R.color.colorPrimary));
-                    isFemaleOn = true;
-                }
+                isFemaleOn = (!isFemaleOn);
+                pref.putBoolean("isFemaleOn", isFemaleOn);
+                pref.apply();
+                addColor(button, isFemaleOn);
                 break;
             case R.id.filter_near_me:
                 if (!near_me) {
@@ -361,17 +390,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         button.setColorFilter(getResources().getColor(R.color.colorPrimary));
                         ((ImageButton) findViewById(R.id.filter_public)).setColorFilter(getResources().getColor(R.color.lightGray));
                         near_me = true;
+                        pref.putBoolean("near_me", true);
+                        pref.apply();
                     }
                     else {
-                        new MyLocationListener(this, button, (ImageButton) findViewById(R.id.filter_public));
+                        new MyLocationListener(this, button, (ImageButton) findViewById(R.id.filter_public), (CritiqueFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame));
                     }
                 }
                 break;
             case R.id.filter_public:
                 if (near_me) {
                     button.setColorFilter(getResources().getColor(R.color.colorPrimary));
-                    ((ImageButton)findViewById(R.id.filter_near_me)).setColorFilter(getResources().getColor(R.color.lightGray));
+                    ((ImageButton) findViewById(R.id.filter_near_me)).setColorFilter(getResources().getColor(R.color.lightGray));
                     near_me = false;
+                    pref.putBoolean("near_me", false);
+                    pref.apply();
                 }
                 break;
         }

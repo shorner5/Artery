@@ -111,8 +111,11 @@
     <string name="no_delete">Can\'t delete!</string>
     <string name="no_delete_body">You must have at least one drawing in your gallery so other users can see you. If you don\'t want other users to see you, you can turn off "Discoverable" in Settings.</string>
 
-    <string name="gps_disabled">Artery needs to know your location so we can show you users around you. You can enable location from settings.</string>
+    <string name="gps_disabled">Artery needs to know your location so we can show you users around you. If you don\'t want to enable location, you can still see users from all around the world.</string>
     <string name="open_location_settings">Enable Location</string>
     <string name="cancel">Cancel</string>
+
+    <string name="out_of_users">That\'s everyone for now!</string>
+    <string name="clear_seen">Reset Who You\'ve Swiped On</string>
 
 </resources>
