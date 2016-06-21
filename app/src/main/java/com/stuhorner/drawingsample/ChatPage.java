@@ -20,6 +20,11 @@ import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.FirebaseError;
+
 import java.lang.CharSequence;
 import java.lang.Runnable;
 import java.lang.String;
@@ -30,36 +35,39 @@ import java.util.List;
  * Created by Stu on 12/24/2015.
  */
 public class ChatPage extends AppCompatActivity {
-    List<String> messages;
+    List<Message> messages = new ArrayList<>();
+    String UID;
     ImageButton sendButton;
-    String person_name;
+    ChatMessageAdapter adapter;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_page);
-        person_name = getIntent().getStringExtra(ChatFragment.PERSON_NAME);
+        UID = getIntent().getStringExtra("UID");
 
         Window window = getWindow();
         window.setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
         Toolbar toolbar = (Toolbar) findViewById(R.id.chat_toolbar);
-         setSupportActionBar(toolbar);
+        setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.ic_back));
-        getSupportActionBar().setTitle(person_name);
+        getSupportActionBar().setTitle(getIntent().getStringExtra("name"));
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
             }
         });
+
         initMessages();
 
         final EditText editText = (EditText) findViewById(R.id.chat_edit_text);
         sendButton = (ImageButton) findViewById(R.id.chat_sendButton);
         sendButton.setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
         sendButton.setAlpha(.2f);
+
         final ListView listView = (ListView) findViewById(R.id.chat_messages);
         listView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
-        final ChatMessageAdapter adapter = new ChatMessageAdapter(ChatPage.this, "a", messages);
+        adapter = new ChatMessageAdapter(ChatPage.this, messages);
         listView.setAdapter(adapter);
 
         editText.addTextChangedListener(new TextWatcher() {
@@ -97,23 +105,32 @@ public class ChatPage extends AppCompatActivity {
                         if (editText.getText().length() > 0) {
                             sendButton.startAnimation(scaleUp);
                             //launch chat bubble
-                            messages.add(editText.getText().toString());
+                            Message messageToSend = new Message(editText.getText().toString(), MyUser.getInstance().getUID());
+                            //messages.add(messageToSend);
+                            sendMessage(messageToSend);
                             editText.setText(null);
-                            adapter.notifyDataSetChanged();
-                            listView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
-                            listView.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    listView.smoothScrollToPosition(listView.getMaxScrollAmount());
-                                    listView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
-                                }
-                            });
+                            //adapter.notifyDataSetChanged();
+                            //listView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
+                            //listView.post(new Runnable() {
+                              //  @Override
+                                //public void run() {
+                                  //  listView.smoothScrollToPosition(listView.getMaxScrollAmount());
+                                    //listView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
+                                //}
+                            //});
                         }
                         break;
                 }
                 return false;
             }
         });
+    }
+
+    private void sendMessage(Message messageToSend) {
+        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("last_message").setValue(messageToSend);
+        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).child("last_message").setValue(messageToSend);
+        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).push().setValue(messageToSend);
+        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).push().setValue(messageToSend);
     }
 
     @Override
@@ -126,7 +143,7 @@ public class ChatPage extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.chat_profile) {
             Intent intent = new Intent(ChatPage.this, ProfileActivity.class);
-            intent.putExtra(MainActivity.PERSON_NAME, person_name);
+            intent.putExtra("UID", UID);
             intent.putExtra("buttons_off", true);
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
@@ -141,18 +158,35 @@ public class ChatPage extends AppCompatActivity {
     }
 
     private void initMessages() {
-        messages = new ArrayList<>();
-        messages.add("The artist is the creator of beautiful things.  To reveal art and");
-        messages.add("conceal the artist is art's aim.  The critic is he who can translate");
-        messages.add("into another manner or a new material his impression of beautiful things.");
-        messages.add("The highest as the lowest form of criticism is a mode of autobiography.");
-        messages.add("Those who find ugly meanings in beautiful things are corrupt without being charming");
-        messages.add("Those who find beautiful meanings in beautiful things are the cultivated.");
-        messages.add("For these there is hope.  They are the elect to whom beautiful things mean only beauty.");
-        messages.add("There is no such thing as a moral or an immoral book.  Books are well");
-        messages.add("The nineteenth century dislike of realism is the rage of Caliban seeing his own face in a glass.");
-        messages.add("The nineteenth century dislike of romanticism is the rage of Caliban");
-        messages.add("not seeing his own face in a glass.  The moral life of man forms part");
-        messages.add("of the subject-matter of the artist, but the morality of art consists");
+        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if (!dataSnapshot.getKey().equals("last_message")) {
+                    Message message = new Message(dataSnapshot.child("body").getValue().toString(), dataSnapshot.child("sender").getValue().toString());
+                    messages.add(message);
+                    adapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
     }
 }

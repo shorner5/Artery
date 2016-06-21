@@ -7,6 +7,13 @@
     android:clipChildren="false"
     android:background="@android:color/white">
 
+    <ProgressBar
+        android:id="@+id/chat_pb"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerInParent="true"
+        />
+
     <android.support.v7.widget.RecyclerView
         android:layout_height="match_parent"
         android:layout_width="match_parent"

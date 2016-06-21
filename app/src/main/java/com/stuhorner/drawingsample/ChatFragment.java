@@ -3,13 +3,17 @@ package com.stuhorner.drawingsample;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import android.widget.ProgressBar;
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,10 +21,12 @@ import java.util.List;
  * Created by Stu on 12/14/2015.
  */
 public class ChatFragment extends Fragment {
-    List<String> personNames;
-    List<String> subtitles;
-    List<Integer> chatIcons;
-    public final static String PERSON_NAME = "com.stuhorner.drawingsample.PERSON_NAME";
+    List<String> UID = new ArrayList<>();
+    List<String> personNames = new ArrayList<>();
+    List<String> subtitles = new ArrayList<>();
+    List<Integer> chatIcons = new ArrayList<>();
+    ChatAdapter adapter;
+    ProgressBar progressBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -28,9 +34,9 @@ public class ChatFragment extends Fragment {
 
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.chat_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
+        progressBar = (ProgressBar) view.findViewById(R.id.chat_pb);
         initData();
-        ChatAdapter adapter = new ChatAdapter(personNames, subtitles, chatIcons);
+        adapter = new ChatAdapter(personNames, subtitles, chatIcons);
 
         recyclerView.setAdapter(adapter);
 
@@ -39,7 +45,8 @@ public class ChatFragment extends Fragment {
             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                 //transition to page activity
                 Intent intent = new Intent(getActivity(), ChatPage.class);
-                intent.putExtra(PERSON_NAME, personNames.get(position));
+                intent.putExtra("UID", UID.get(position));
+                intent.putExtra("name", personNames.get(position));
                 getActivity().startActivity(intent);
                 getActivity().overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
             }
@@ -48,40 +55,69 @@ public class ChatFragment extends Fragment {
     }
 
     private void initData() {
-        personNames = new ArrayList<>();
-        personNames.add("Giselle");
-        personNames.add("Eric");
-        personNames.add("Tobias");
-        personNames.add("Wilfreda");
-        personNames.add("Patience");
-        personNames.add("Glenda");
-        personNames.add("Neil");
-        personNames.add("Don");
-        personNames.add("Robert");
-        personNames.add("Erin");
-        personNames.add("Amelia");
-        personNames.add("Mason");
-        personNames.add("Sawyer");
+        MainActivity.rootRef.child("users").child(MyUser.getInstance().getUID()).child("matchedUsers").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                UID.add(dataSnapshot.getValue().toString());
+                getName(dataSnapshot.getValue().toString());
+            }
 
-        subtitles = new ArrayList<>();
-        subtitles.add("The artist is the creator of beautiful things.  To reveal art and");
-        subtitles.add("conceal the artist is art's aim.  The critic is he who can translate");
-        subtitles.add("into another manner or a new material his impression of beautiful things.");
-        subtitles.add("The highest as the lowest form of criticism is a mode of autobiography.");
-        subtitles.add("Those who find ugly meanings in beautiful things are corrupt without being charming");
-        subtitles.add("Those who find beautiful meanings in beautiful things are the cultivated.");
-        subtitles.add("For these there is hope.  They are the elect to whom beautiful things mean only beauty.");
-        subtitles.add("There is no such thing as a moral or an immoral book.  Books are well");
-        subtitles.add("The nineteenth century dislike of realism is the rage of Caliban seeing his own face in a glass.");
-        subtitles.add("The nineteenth century dislike of romanticism is the rage of Caliban");
-        subtitles.add("not seeing his own face in a glass.  The moral life of man forms part");
-        subtitles.add("of the subject-matter of the artist, but the morality of art consists");
-        subtitles.add("swag #3hunnid");
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
 
-        chatIcons = new ArrayList<>();
-        for (int i = 0; i < 13; i++){
-            chatIcons.add(R.drawable.ic_profile);
-        }
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
 
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+        });
+    }
+
+    private void getName(final String UID) {
+        MainActivity.rootRef.child("users").child(UID).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                personNames.add(dataSnapshot.getValue().toString());
+                subtitles.add("New Match! Tap to send a message");
+                Log.d("added", personNames.get(personNames.size() - 1));
+                getSubtitle(UID, personNames.size() - 1);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+        });
+    }
+
+    private void getSubtitle(String UID, final int position) {
+        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("last_message").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    subtitles.remove(position);
+                    subtitles.add(position, dataSnapshot.child("body").getValue().toString());
+                    chatIcons.add(R.drawable.ic_profile);
+                }
+                else {
+                    subtitles.remove(position);
+                    subtitles.add(position, "New Match! Tap to send a message");
+                    chatIcons.add(R.drawable.ic_profile);
+                }
+                Log.d("with subtitle", subtitles.get(subtitles.size() - 1));
+                adapter.notifyDataSetChanged();
+                progressBar.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+        });
     }
 }
