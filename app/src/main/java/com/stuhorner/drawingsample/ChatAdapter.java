@@ -1,5 +1,7 @@
 package com.stuhorner.drawingsample;
 
+import android.content.Context;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,11 +28,15 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ItemsViewHolde
     List<String> personNames;
     List<String> subtitles;
     List<Integer> chatIcons;
+    List<Boolean> newMessage;
+    private Context context;
 
-    public ChatAdapter(List<String> personNames, List<String> subtitles, List<Integer> chatIcons) {
+    public ChatAdapter(List<String> personNames, List<String> subtitles, List<Integer> chatIcons, List<Boolean> newMessage, Context context) {
         this.personNames = personNames;
         this.subtitles = subtitles;
         this.chatIcons = chatIcons;
+        this.newMessage = newMessage;
+        this.context = context;
     }
 
     @Override
@@ -47,6 +53,14 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ItemsViewHolde
     public void onBindViewHolder(ItemsViewHolder itemViewHolder, int i) {
         itemViewHolder.personName.setText(personNames.get(i));
         itemViewHolder.subtitle.setText(subtitles.get(i));
+        if (newMessage.get(i)) {
+            itemViewHolder.personName.setTypeface(null, Typeface.BOLD);
+            itemViewHolder.subtitle.setTextColor(context.getResources().getColor(R.color.colorPrimary));
+        }
+        else {
+            itemViewHolder.personName.setTypeface(null, Typeface.NORMAL);
+            itemViewHolder.subtitle.setTextColor(context.getResources().getColor(R.color.lightGray));
+        }
     }
 
     @Override

@@ -26,7 +26,8 @@
         </activity>
         <activity
             android:name=".ChatPage"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden">
         </activity>
         <activity
             android:name=".ProfileActivity"

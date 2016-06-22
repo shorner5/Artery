@@ -109,7 +109,7 @@
     <string name="welcome_body">Swipe right on drawings you like. Swipe left on drawings you don\'t. A match occurs when you and the other person both like each other\'s drawings! To chat with matches, swipe right from the edge.</string>
 
     <string name="no_delete">Can\'t delete!</string>
-    <string name="no_delete_body">You must have at least one drawing in your gallery so other users can see you. If you don\'t want other users to see you, you can turn off "Discoverable" in Settings.</string>
+    <string name="no_delete_body">You must have at least one drawing in your gallery so other users can see you.</string>
 
     <string name="gps_disabled">Artery needs to know your location so we can show you users around you. If you don\'t want to enable location, you can still see users from all around the world.</string>
     <string name="open_location_settings">Enable Location</string>

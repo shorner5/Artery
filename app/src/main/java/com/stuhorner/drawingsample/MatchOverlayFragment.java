@@ -91,7 +91,8 @@ public class MatchOverlayFragment extends DialogFragment {
         switch (button.getId()) {
             case R.id.match_name:
                 Intent intent = new Intent(getActivity(), ChatPage.class);
-                intent.putExtra("UID", getArguments().getString("name"));
+                intent.putExtra("UID", getArguments().getString("UID"));
+                intent.putExtra("name", getArguments().getString("name"));
                 startActivity(intent);
                 getActivity().overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
                 break;

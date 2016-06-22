@@ -21,6 +21,7 @@ import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ServerValue;
 import com.firebase.client.ValueEventListener;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -222,6 +223,7 @@ public class CritiqueFragment extends Fragment {
     }
 
     private void launchMatch(String name, String UID) {
+        sendEmptyMessage(UID);
         MatchOverlayFragment match = MatchOverlayFragment.newInstance(name, UID);
         match.show(getActivity().getFragmentManager(), "hello");
     }
@@ -389,5 +391,15 @@ public class CritiqueFragment extends Fragment {
             }
         }
         return false;
+    }
+
+    private void sendEmptyMessage(String UID) {
+        Message messageToSend = new Message("", "");
+        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
+        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
+        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("metadata").child("last_message").setValue(messageToSend);
+        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).child("metadata").child("last_message").setValue(messageToSend);
+        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).push().setValue(messageToSend);
+        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).push().setValue(messageToSend);
     }
 }

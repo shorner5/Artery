@@ -23,10 +23,11 @@ import android.widget.ListView;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ServerValue;
 
 import java.lang.CharSequence;
-import java.lang.Runnable;
 import java.lang.String;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,8 @@ public class ChatPage extends AppCompatActivity {
     String UID;
     ImageButton sendButton;
     ChatMessageAdapter adapter;
+    boolean active = true;
+    Firebase ref;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,8 +130,10 @@ public class ChatPage extends AppCompatActivity {
     }
 
     private void sendMessage(Message messageToSend) {
-        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("last_message").setValue(messageToSend);
-        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).child("last_message").setValue(messageToSend);
+        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
+        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
+        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("metadata").child("last_message").setValue(messageToSend);
+        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).child("metadata").child("last_message").setValue(messageToSend);
         MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).push().setValue(messageToSend);
         MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).push().setValue(messageToSend);
     }
@@ -153,19 +158,26 @@ public class ChatPage extends AppCompatActivity {
 
     public void onBackPressed() {
         super.onBackPressed();
+        active = false;
         sendButton.getBackground().clearColorFilter();
         overridePendingTransition(R.anim.fade_in, R.anim.slide_out);
     }
 
     private void initMessages() {
-        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).addChildEventListener(new ChildEventListener() {
+        ref = MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID);
+        ref.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if (!dataSnapshot.getKey().equals("last_message")) {
+                Log.d("datasnap", dataSnapshot.toString());
+                if (!dataSnapshot.getKey().equals("metadata") && !dataSnapshot.child("body").getValue().toString().equals("")) {
                     Message message = new Message(dataSnapshot.child("body").getValue().toString(), dataSnapshot.child("sender").getValue().toString());
                     messages.add(message);
                     adapter.notifyDataSetChanged();
                 }
+
+                //update seen time
+                if (active)
+                MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("metadata").child("seen_message_time").setValue(ServerValue.TIMESTAMP);
             }
 
             @Override
