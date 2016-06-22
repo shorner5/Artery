@@ -25,17 +25,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ItemsViewHolde
         }
     }
 
-    List<String> personNames;
-    List<String> subtitles;
-    List<Integer> chatIcons;
-    List<Boolean> newMessage;
+    List<ChatRow> chatRows;
     private Context context;
 
-    public ChatAdapter(List<String> personNames, List<String> subtitles, List<Integer> chatIcons, List<Boolean> newMessage, Context context) {
-        this.personNames = personNames;
-        this.subtitles = subtitles;
-        this.chatIcons = chatIcons;
-        this.newMessage = newMessage;
+    public ChatAdapter(List<ChatRow> chatRows, Context context) {
+        this.chatRows = chatRows;
         this.context = context;
     }
 
@@ -51,9 +45,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ItemsViewHolde
 
     @Override
     public void onBindViewHolder(ItemsViewHolder itemViewHolder, int i) {
-        itemViewHolder.personName.setText(personNames.get(i));
-        itemViewHolder.subtitle.setText(subtitles.get(i));
-        if (newMessage.get(i)) {
+        itemViewHolder.personName.setText(chatRows.get(i).getName());
+        itemViewHolder.subtitle.setText(chatRows.get(i).getSubtitle());
+        if (chatRows.get(i).isNewMessage()) {
             itemViewHolder.personName.setTypeface(null, Typeface.BOLD);
             itemViewHolder.subtitle.setTextColor(context.getResources().getColor(R.color.colorPrimary));
         }
@@ -65,7 +59,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ItemsViewHolde
 
     @Override
     public int getItemCount() {
-        return personNames.size();
+        return chatRows.size();
     }
 
 }
