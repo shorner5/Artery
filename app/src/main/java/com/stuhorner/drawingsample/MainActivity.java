@@ -25,9 +25,13 @@ import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.appyvet.rangebar.RangeBar;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 
 import java.io.File;
 
@@ -66,7 +70,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (pref.getString("UID", null) == null) {
             clearSavedData();
             Intent intent = new Intent(getApplicationContext(), FirstLaunchActivity.class);
-            startActivityForResult(intent, 1);
+            //startActivityForResult(intent, 1);
+            startActivity(intent);
+            finish();
         }
         else {
             MyUser.getInstance().populateUser(pref.getString("UID", pref.getString("UID", null)));
@@ -88,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 super.onDrawerClosed(view);
                 if (page == ON_DRAWING) {
+                    Log.d("drawer", "ON_DRAWING_LOCK");
                     drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                 }
             }
@@ -112,9 +119,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initFilter();
         initNavHeader();
 
-        //if (pref.getBoolean("near_me", true)) {
-            new MyLocationListener(this, (ImageButton) findViewById(R.id.filter_near_me), (ImageButton) findViewById(R.id.filter_public), fragment);
-        //}
+        new MyLocationListener(this, (ImageButton) findViewById(R.id.filter_near_me), (ImageButton) findViewById(R.id.filter_public), fragment);
+
+        //start notification activity
+        Intent serviceIntent = new Intent(MainActivity.this, FirebaseNotifService.class);
+        startService(serviceIntent);
     }
 
     @Override
@@ -171,13 +180,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (page == ON_CRITIQUE) {
             getMenuInflater().inflate(R.menu.main, menu);
             menu.findItem(R.id.action_filter).getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
-            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, findViewById(R.id.filter_view));
         }
         else if (page == ON_DRAWING) {
             getMenuInflater().inflate(R.menu.menu_drawing_top, menu);
             if (getSupportActionBar() != null) { getSupportActionBar().setTitle(""); }
             menu.findItem(R.id.action_done).getIcon().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
-            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         }
         return true;
     }
@@ -250,7 +258,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 invalidateOptionsMenu();
                 break;
             case R.id.nav_settings:
-                getFragmentManager().beginTransaction().replace(R.id.content_frame, new SettingsFragment()).commit();
+                fragment  = new SettingsFragment();
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                 if (getSupportActionBar() != null) {getSupportActionBar().setTitle(R.string.action_settings);}
                 appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
                 appBarLayout.setElevation(8);
@@ -287,6 +296,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(intent);
             }
         });
+
+        SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+        if (pref.getString("UID", null) != null) {
+            rootRef.child("users").child(pref.getString("UID", null)).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    TextView title = (TextView) findViewById(R.id.header_username);
+                    if (title != null) {
+                        title.setText(dataSnapshot.getValue().toString());
+                    }
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                }
+            });
+        }
     }
 
     private void initFilter() {

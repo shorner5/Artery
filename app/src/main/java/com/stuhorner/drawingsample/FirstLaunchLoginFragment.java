@@ -1,6 +1,7 @@
 package com.stuhorner.drawingsample;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -52,7 +53,10 @@ public class FirstLaunchLoginFragment extends Fragment {
                             pref.putString("UID", MyUser.getInstance().getUID());
                             Log.d("UID", MyUser.getInstance().getUID());
                             pref.apply();
-                            getActivity().setResult(1);
+                            //getActivity().setResult(1);
+
+                            Intent intent = new Intent(getActivity(), MainActivity.class);
+                            startActivity(intent);
                             getActivity().finish();
                         }
 

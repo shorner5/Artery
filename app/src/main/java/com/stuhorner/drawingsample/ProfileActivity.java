@@ -44,6 +44,7 @@ public class ProfileActivity extends AppCompatActivity{
     int result = 0;
     boolean buttons_on = true;
     boolean edittable = false, editting = false;
+    Firebase ref = new Firebase("https://artery.firebaseio.com/");
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -238,7 +239,7 @@ public class ProfileActivity extends AppCompatActivity{
     }
 
     private void initData() {
-        MainActivity.rootRef.child("users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
+        ref.child("users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (getSupportActionBar() != null) {

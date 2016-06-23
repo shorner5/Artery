@@ -380,7 +380,11 @@ public class DrawFragment extends Fragment {
                     switch (item.getItemId()) {
                         case R.id.action_done:
                             MyUser.getInstance().setCard(saveImage(false));
+
+                            Intent intent = new Intent(getActivity(), MainActivity.class);
+                            startActivity(intent);
                             getActivity().finish();
+
                             break;
                         case R.id.action_help:
                             showHelpDialog();

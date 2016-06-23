@@ -19,6 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
@@ -35,8 +36,8 @@ import java.util.List;
 public class ProfileGalleryFragment extends Fragment {
     ArrayList<String> drawings;
     ProfileGalleryAdapter adapter;
-    public ProfileGalleryFragment(){}
-
+    Firebase ref = new Firebase("https://artery.firebaseio.com/");
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View view = inflater.inflate(R.layout.profile_gallery, container, false);
@@ -58,7 +59,7 @@ public class ProfileGalleryFragment extends Fragment {
         }
         else {
             progressBar.setVisibility(View.VISIBLE);
-            MainActivity.rootRef.child("users").child(getActivity().getIntent().getStringExtra("UID")).addListenerForSingleValueEvent(new ValueEventListener() {
+            ref.child("users").child(getActivity().getIntent().getStringExtra("UID")).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.child("gallery").getValue() != null) {

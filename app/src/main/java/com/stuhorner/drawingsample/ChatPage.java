@@ -42,6 +42,7 @@ public class ChatPage extends AppCompatActivity {
     ChatMessageAdapter adapter;
     boolean active = true;
     Firebase ref;
+    Firebase rootRef = new Firebase("https://artery.firebaseio.com/");
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -130,12 +131,12 @@ public class ChatPage extends AppCompatActivity {
     }
 
     private void sendMessage(Message messageToSend) {
-        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
-        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
-        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("metadata").child("last_message").setValue(messageToSend);
-        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).child("metadata").child("last_message").setValue(messageToSend);
-        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).push().setValue(messageToSend);
-        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).push().setValue(messageToSend);
+        rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
+        rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
+        rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("metadata").child("last_message").setValue(messageToSend);
+        rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).child("metadata").child("last_message").setValue(messageToSend);
+        rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).push().setValue(messageToSend);
+        rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).push().setValue(messageToSend);
     }
 
     @Override
@@ -164,7 +165,10 @@ public class ChatPage extends AppCompatActivity {
     }
 
     private void initMessages() {
-        ref = MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID);
+        Log.d(MyUser.getInstance().getUID(), "a");
+        Log.d(UID, "a");
+
+        ref = rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID);
         ref.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -177,7 +181,7 @@ public class ChatPage extends AppCompatActivity {
 
                 //update seen time
                 if (active)
-                MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("metadata").child("seen_message_time").setValue(ServerValue.TIMESTAMP);
+                rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("metadata").child("seen_message_time").setValue(ServerValue.TIMESTAMP);
             }
 
             @Override

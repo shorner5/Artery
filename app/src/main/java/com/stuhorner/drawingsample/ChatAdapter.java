@@ -9,8 +9,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.List;
+import java.util.Random;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ItemsViewHolder>{
+    int colors[] = {R.color.green, R.color.orange,  R.color.red,  R.color.purple,  R.color.blue,  R.color.deepBlue,  R.color.brown,  R.color.pink,  R.color.colorAccent};
 
     public static class ItemsViewHolder extends RecyclerView.ViewHolder{
         TextView personName;
@@ -55,6 +57,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ItemsViewHolde
             itemViewHolder.personName.setTypeface(null, Typeface.NORMAL);
             itemViewHolder.subtitle.setTextColor(context.getResources().getColor(R.color.lightGray));
         }
+
+        int index = chatRows.get(i).getName().length() % 9;
+        itemViewHolder.icon.setColorFilter(context.getResources().getColor(colors[index]));
     }
 
     @Override

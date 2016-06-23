@@ -34,6 +34,7 @@
     <string name="action_help">Help</string>
     <string name="logout"> Log out</string>
 
+    <string name="new_match_notif">You matched with <b>%1$s</b></string>
     <string name="card_title"><b>%1$s</b>, <b>%2$s</b></string>
     <string name="send_message">Send <b>%1$s</b> a message</string>
     <string name="match_view_profile">View <b>%1$s</b>\'s profile</string>

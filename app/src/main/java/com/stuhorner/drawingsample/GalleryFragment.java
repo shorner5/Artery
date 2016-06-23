@@ -43,7 +43,7 @@ public class GalleryFragment extends Fragment implements GalleryOptionsDialog.On
     ImageAdapter img;
     int selected = 0;
     GridView gridView; ProgressBar progressBar;
-    public static final int RESULT_CODE = 2;
+    public static final int REQUEST_CODE = 2;
 
     @Override
     public void onDialogSelection(int position) {
@@ -91,7 +91,7 @@ public class GalleryFragment extends Fragment implements GalleryOptionsDialog.On
                 Intent intent = new Intent(getActivity(), DisplayDrawingActivity.class);
                 intent.putExtra("edit_image", drawings.get(i));
                 ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(),view,"image_scale");
-                startActivityForResult(thisFragment, intent, RESULT_CODE, options.toBundle());
+                startActivityForResult(intent, REQUEST_CODE, options.toBundle());
             }
         });
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -108,33 +108,9 @@ public class GalleryFragment extends Fragment implements GalleryOptionsDialog.On
         return view;
     }
 
-    private void startActivityForResult(Fragment fragment, Intent intent,
-                                              int requestCode, Bundle options) {
-        if (Build.VERSION.SDK_INT >= 16) {
-            if ((requestCode & 0xffff0000) != 0) {
-                throw new IllegalArgumentException("Can only use lower 16 bits" +
-                        " for requestCode");
-            }
-            if (requestCode != -1) {
-                try {
-                    Field mIndex = Fragment.class.getDeclaredField("mIndex");
-                    mIndex.setAccessible(true);
-                    requestCode = ((mIndex.getInt(this) + 1) << 16) + (requestCode & 0xffff);
-                } catch (NoSuchFieldException e) {
-                    throw new RuntimeException(e);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            ActivityCompat.startActivityForResult(fragment.getActivity(), intent,
-                    requestCode, options);
-        } else {
-            fragment.getActivity().startActivityFromFragment(this, intent, requestCode);
-        }
-    }
-
     @Override
     public void onActivityResult (int requestCode, int resultCode, Intent data) {
+        Log.d("requestCode, resultCode", requestCode + ", " + resultCode);
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != Activity.RESULT_CANCELED) {
             String path = data.getStringExtra("edit_image");

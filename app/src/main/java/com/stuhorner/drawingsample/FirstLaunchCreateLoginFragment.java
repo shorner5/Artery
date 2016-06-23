@@ -71,9 +71,9 @@ public class FirstLaunchCreateLoginFragment extends Fragment {
                                     MyUser.getInstance().setUID(result.get("uid"));
                                     //save UID
                                     rootRef.child("user_index").push().setValue(result.get("uid"));
-                                    SharedPreferences.Editor pref = getActivity().getSharedPreferences("UID", Context.MODE_PRIVATE).edit();
+                                    SharedPreferences.Editor pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE).edit();
                                     pref.putString("UID", MyUser.getInstance().getUID());
-                                    pref.apply();
+                                    pref.commit();
 
                                     //set name and age
                                     SharedPreferences getData = getActivity().getPreferences(Context.MODE_PRIVATE);
