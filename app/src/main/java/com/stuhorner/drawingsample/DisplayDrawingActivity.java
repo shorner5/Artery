@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.transition.Slide;
@@ -69,11 +70,13 @@ public class DisplayDrawingActivity extends AppCompatActivity {
 
     @TargetApi(21)
     private void setTransitions() {
-        Transition slide = new Slide();
-        slide.excludeTarget(android.R.id.statusBarBackground, true);
-        slide.excludeTarget(android.R.id.navigationBarBackground, true);
-        getWindow().setEnterTransition(slide);
-        getWindow().setExitTransition(slide);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Transition slide = new Slide();
+            slide.excludeTarget(android.R.id.statusBarBackground, true);
+            slide.excludeTarget(android.R.id.navigationBarBackground, true);
+            getWindow().setEnterTransition(slide);
+            getWindow().setExitTransition(slide);
+        }
     }
 
     @Override

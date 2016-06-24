@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -159,7 +160,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new CritiqueFragment()).commit();
                 if (getSupportActionBar() != null) {getSupportActionBar().setTitle("");}
                 AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
-                appBarLayout.setElevation(0);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                    appBarLayout.setElevation(0);
                 page = ON_CRITIQUE;
                 drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
                 invalidateOptionsMenu();
@@ -223,7 +225,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "MAIN_FRAG").commit();
                 if (getSupportActionBar() != null) {getSupportActionBar().setTitle("");}
                 appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
-                appBarLayout.setElevation(0);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                    appBarLayout.setElevation(0);
                 page = ON_CRITIQUE;
                 invalidateOptionsMenu();
                 break;
@@ -233,7 +236,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentManager= getSupportFragmentManager();
                 fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
                 appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
-                appBarLayout.setElevation(8);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                    appBarLayout.setElevation(8);
                 page = ON_DRAWING;
                 invalidateOptionsMenu();
                 break;
@@ -243,7 +247,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
                 if (getSupportActionBar() != null) {getSupportActionBar().setTitle(R.string.action_chat);}
                 appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
-                appBarLayout.setElevation(8);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                    appBarLayout.setElevation(8);
                 page = HIDE_MENU;
                 invalidateOptionsMenu();
                 break;
@@ -253,7 +258,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
                 if (getSupportActionBar() != null) {getSupportActionBar().setTitle(R.string.action_gallery);}
                 appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
-                appBarLayout.setElevation(8);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                    appBarLayout.setElevation(8);
                 page = HIDE_MENU;
                 invalidateOptionsMenu();
                 break;
@@ -262,7 +268,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                 if (getSupportActionBar() != null) {getSupportActionBar().setTitle(R.string.action_settings);}
                 appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
-                appBarLayout.setElevation(8);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                    appBarLayout.setElevation(8);
                 page = HIDE_MENU;
                 invalidateOptionsMenu();
 

@@ -28,7 +28,6 @@ public class OtherUser {
 
     private String name;
     private int age;
-    private String email;
     private String profileText;
     private String profilePicture;
     private int gender;
