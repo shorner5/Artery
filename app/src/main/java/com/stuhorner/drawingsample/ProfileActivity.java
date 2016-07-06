@@ -17,6 +17,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -263,5 +264,17 @@ public class ProfileActivity extends AppCompatActivity{
 
             }
         });
+    }
+
+    public void editSex(View v) {
+        if (editting) {
+
+        }
+    }
+
+    public void editAge(View v) {
+        if (editting) {
+
+        }
     }
 }

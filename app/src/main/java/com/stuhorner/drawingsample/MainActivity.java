@@ -5,13 +5,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,19 +38,20 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
 import java.io.File;
+import java.util.jar.Manifest;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     final static int MIN_AGE_ALLOWED = 18;
     final static int HIDE_MENU = 3;
     final static int ON_CRITIQUE = 1, ON_DRAWING = 2;
-    boolean isMaleOn, isFemaleOn;
+    boolean isMaleOn, isFemaleOn, filtersChanged = false;
     public static boolean near_me = false;
     int minAge = 18, maxAge = 70;
     int page = ON_CRITIQUE;
     DrawerLayout drawer;
     NavigationView navigationView, filterView;
     public static Firebase rootRef;
-    public final static String PERSON_NAME = "com.stuhorner.buckit.PERSON_NAME";
+    public final static int PERMISSION_LOCATION = 1, PERMISSION_STORAGE = 2;
     CritiqueFragment fragment;
 
     @Override
@@ -89,9 +93,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onDrawerClosed(View view) {
                 if (view.getId() == R.id.filter_view) {
-                    fragment = new CritiqueFragment();
-                    android.support.v4.app.FragmentManager fragmentManager= getSupportFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                    if (filtersChanged) {
+                        Log.d("replaced", "critique");
+                        fragment = new CritiqueFragment();
+                        android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
+                        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                    }
+                    filtersChanged = false;
                 }
                 super.onDrawerClosed(view);
                 if (page == ON_DRAWING) {
@@ -120,11 +128,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initFilter();
         initNavHeader();
 
-        new MyLocationListener(this, (ImageButton) findViewById(R.id.filter_near_me), (ImageButton) findViewById(R.id.filter_public), fragment);
-
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_LOCATION);
+        }
+        else {
+            new MyLocationListener(this, (ImageButton) findViewById(R.id.filter_near_me), (ImageButton) findViewById(R.id.filter_public), fragment);
+        }
         //start notification activity
         Intent serviceIntent = new Intent(MainActivity.this, FirebaseNotifService.class);
         startService(serviceIntent);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResult) {
+        if (requestCode == PERMISSION_LOCATION && grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED) {
+            new MyLocationListener(this, (ImageButton) findViewById(R.id.filter_near_me), (ImageButton) findViewById(R.id.filter_public), fragment);
+        }
+        if (requestCode == PERMISSION_STORAGE)
+            ((DrawFragment)getSupportFragmentManager().findFragmentByTag("DRAW_FRAG")).saveImage(true);
     }
 
     @Override
@@ -234,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                 fragment = new DrawFragment();
                 fragmentManager= getSupportFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "DRAW_FRAG").commit();
                 appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
                     appBarLayout.setElevation(8);
@@ -369,11 +390,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onRangeChangeListener(RangeBar rangeBar, int leftPinIndex,
                                               int rightPinIndex,
                                               String leftPinValue, String rightPinValue) {
-                minAge = leftPinIndex + MIN_AGE_ALLOWED;
-                maxAge = rightPinIndex + MIN_AGE_ALLOWED;
-                editor.putInt("minAge", minAge);
-                editor.putInt("maxAge", maxAge);
-                editor.apply();
+                if (minAge != leftPinIndex + MIN_AGE_ALLOWED || maxAge != rightPinIndex + MIN_AGE_ALLOWED) {
+                    filtersChanged = true;
+                    minAge = leftPinIndex + MIN_AGE_ALLOWED;
+                    maxAge = rightPinIndex + MIN_AGE_ALLOWED;
+                    editor.putInt("minAge", minAge);
+                    editor.putInt("maxAge", maxAge);
+                    editor.apply();
+                }
             }
         });
     }
@@ -381,7 +405,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void addAnimation(final ImageButton button) {
         final Animation scaleDown = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.scale_down);
         scaleDown.setFillAfter(true);
-        final Animation scaleUp = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.scale_up);
+        final Animation scaleUp = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.scale_up);
         scaleUp.setFillAfter(true);
 
         button.setOnTouchListener(new View.OnTouchListener() {
@@ -410,8 +434,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 pref.putBoolean("isMaleOn", isMaleOn);
                 pref.apply();
                 addColor(button, isMaleOn);
+                filtersChanged = true;
                 break;
             case R.id.filter_female:
+                filtersChanged = true;
                 isFemaleOn = (!isFemaleOn);
                 pref.putBoolean("isFemaleOn", isFemaleOn);
                 pref.apply();
@@ -419,6 +445,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.filter_near_me:
                 if (!near_me) {
+                    filtersChanged = true;
                     if (MyLocationListener.hasLocation) {
                         button.setColorFilter(getResources().getColor(R.color.colorPrimary));
                         ((ImageButton) findViewById(R.id.filter_public)).setColorFilter(getResources().getColor(R.color.lightGray));
@@ -427,12 +454,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         pref.apply();
                     }
                     else {
-                        new MyLocationListener(this, button, (ImageButton) findViewById(R.id.filter_public), (CritiqueFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame));
+                        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(this, new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+                        }
+                        else {
+                            new MyLocationListener(this, button, (ImageButton) findViewById(R.id.filter_public), (CritiqueFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame));
+                        }
                     }
                 }
                 break;
             case R.id.filter_public:
                 if (near_me) {
+                    filtersChanged = true;
                     button.setColorFilter(getResources().getColor(R.color.colorPrimary));
                     ((ImageButton) findViewById(R.id.filter_near_me)).setColorFilter(getResources().getColor(R.color.lightGray));
                     near_me = false;

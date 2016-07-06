@@ -115,6 +115,7 @@
     <string name="gps_disabled">Artery needs to know your location so we can show you users around you. If you don\'t want to enable location, you can still see users from all around the world.</string>
     <string name="open_location_settings">Enable Location</string>
     <string name="cancel">No Thanks</string>
+    <string name="checking_location">Updating your location...</string>
 
     <string name="out_of_users">That\'s everyone for now!</string>
     <string name="clear_seen">Reset Who You\'ve Swiped On</string>

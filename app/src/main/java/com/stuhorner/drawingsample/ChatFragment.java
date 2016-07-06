@@ -39,7 +39,6 @@ public class ChatFragment extends Fragment {
         progressBar = (ProgressBar) view.findViewById(R.id.chat_pb);
         initData();
         adapter = new ChatAdapter(chatRows, getContext());
-
         recyclerView.setAdapter(adapter);
 
         ItemClickSupport.addTo(recyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {

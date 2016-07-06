@@ -74,7 +74,6 @@ public class CustomView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w,h,oldw,oldh);
         Log.d("DIMEN", Integer.toString(w) + ", " + Integer.toString(h));
-
         canvasBitmap = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
         drawCanvas = new Canvas(canvasBitmap);
     }

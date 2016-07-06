@@ -49,7 +49,7 @@ public class FirebaseNotifService extends Service {
                 public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                     ActivityManager activityManager = (ActivityManager) getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
                     List<ActivityManager.RunningTaskInfo> services = activityManager.getRunningTasks(Integer.MAX_VALUE);
-                    if (!services.get(0).topActivity.getPackageName().equalsIgnoreCase(getApplicationContext().getPackageName())) {
+                    if (!services.get(0).topActivity.getPackageName().equalsIgnoreCase(getApplicationContext().getPackageName()) && !UID.equals(dataSnapshot.getKey())) {
                         getName(dataSnapshot.getKey());
                     }
                 }

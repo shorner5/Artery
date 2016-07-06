@@ -1,17 +1,21 @@
 package com.stuhorner.drawingsample;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -37,13 +41,10 @@ public class MyLocationListener implements LocationListener {
         this.filter_public = filter_public;
         this.critiqueFragment = critiqueFragment;
         locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-        try {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        } catch (SecurityException e) {
-            Log.d("SecurityException", e.toString());
+            Toast.makeText(activity.getBaseContext(), activity.getString(R.string.checking_location), Toast.LENGTH_LONG).show();
         }
-
-        Toast.makeText(activity.getBaseContext(), "Finding your location...", Toast.LENGTH_LONG).show();
     }
 
     // Gets the user's location once. To keep getting the current location continuously, comment out "close()"

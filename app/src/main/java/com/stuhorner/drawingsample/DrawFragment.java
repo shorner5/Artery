@@ -6,16 +6,19 @@ import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +46,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.jar.Manifest;
 
 public class DrawFragment extends Fragment {
 
@@ -219,7 +223,7 @@ public class DrawFragment extends Fragment {
         }
     }
 
-    private String saveImage(boolean toGallery) {
+    public String saveImage(boolean toGallery) {
         customView.setDrawingCacheEnabled(true);
         customView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
         Bitmap bm = customView.getDrawingCache();
@@ -238,35 +242,40 @@ public class DrawFragment extends Fragment {
         }
 
         String title = "drawing" + System.currentTimeMillis() + ".png";
-        String saved = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), customView.getDrawingCache(), title, "drawing");
-
-        try {
-            if (!dir.isDirectory() || !dir.exists()){
-                dir.mkdirs();
-            }
-            file = new File(dir, title);
-            FileOutputStream fOut = new FileOutputStream(file);
-            bm.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-            //add to MyUser's gallery
-            if (!toGallery) {
-                BitmapUploadTask task = new BitmapUploadTask(BitmapUploadTask.ADD_TO_GALLERY);
-                task.execute(file.getAbsolutePath());
-            }
-
-            fOut.close();
-        } catch (FileNotFoundException e){
-            e.printStackTrace();
-            Toast.makeText(getContext(), "Not enough space on this device!", Toast.LENGTH_SHORT).show();
-        } catch(IOException e){
-            e.printStackTrace();
-            Toast.makeText(getContext(), "Not enough space on this device!", Toast.LENGTH_SHORT).show();
+        if (toGallery && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && getActivity().checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, MainActivity.PERMISSION_STORAGE);
         }
+        else {
+            String saved = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), customView.getDrawingCache(), title, "drawing");
+            try {
+                if (!dir.isDirectory() || !dir.exists()) {
+                    dir.mkdirs();
+                }
+                file = new File(dir, title);
+                FileOutputStream fOut = new FileOutputStream(file);
+                bm.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+                //add to MyUser's gallery
+                if (!toGallery) {
+                    BitmapUploadTask task = new BitmapUploadTask(BitmapUploadTask.ADD_TO_GALLERY);
+                    task.execute(file.getAbsolutePath());
+                }
 
-        if (saved != null && toGallery) {
-            Snackbar.make(customView, R.string.saved, Snackbar.LENGTH_SHORT).show();
+                fOut.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Toast.makeText(getContext(), "Unable to save to the device!", Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(getContext(), "Unable to save to the device!", Toast.LENGTH_SHORT).show();
+            }
+
+            if (saved != null && toGallery) {
+                Snackbar.make(customView, R.string.saved, Snackbar.LENGTH_SHORT).show();
+            }
+            customView.destroyDrawingCache();
+            return file.getAbsolutePath();
         }
-        customView.destroyDrawingCache();
-        return file.getAbsolutePath();
+        return null;
     }
 
     private void changeStroke() {
@@ -362,6 +371,7 @@ public class DrawFragment extends Fragment {
     }
 
     private void hasTopToolbar(View view) {
+        Log.d("firstLaunchDraw", Boolean.toString(getActivity().getIntent().getBooleanExtra("firstLaunchDraw", false)));
         if (getActivity().getIntent().getBooleanExtra("firstLaunchDraw", false)) {
             RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             p.addRule(RelativeLayout.BELOW, R.id.toolbar_top);
@@ -380,7 +390,6 @@ public class DrawFragment extends Fragment {
                     switch (item.getItemId()) {
                         case R.id.action_done:
                             MyUser.getInstance().setCard(saveImage(false));
-
                             Intent intent = new Intent(getActivity(), MainActivity.class);
                             startActivity(intent);
                             getActivity().finish();

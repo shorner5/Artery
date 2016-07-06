@@ -21,6 +21,7 @@ import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
 import com.firebase.client.ServerValue;
 import com.firebase.client.ValueEventListener;
 import com.firebase.geofire.GeoFire;
@@ -32,11 +33,15 @@ import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class CritiqueFragment extends Fragment {
     SwipeFlingAdapterView flingContainer;
     List<OtherUser> users = new ArrayList<>();
+    Queue<String> userQueue = new LinkedList<>();
+    String lastKnownKey;
     CardAdapter adapter;
     ImageButton yesButton, noButton;
     GeoFire geoFire = new GeoFire(new Firebase("https://artery.firebaseio.com"));
@@ -99,7 +104,11 @@ public class CritiqueFragment extends Fragment {
 
             @Override
             public void onAdapterAboutToEmpty(int itemsInAdapter) {
-                handleNearMe();
+                if (userQueue.isEmpty())
+                    handleNearMe();
+                else {
+                    populateFromKey(userQueue.poll());
+                }
             }
 
             @Override
@@ -184,11 +193,8 @@ public class CritiqueFragment extends Fragment {
         Log.d("handleNearMe", "here");
         SharedPreferences pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
         near_me = pref.getBoolean("near_me", true);
-        Log.d("near me", Boolean.toString(near_me));
         if (!near_me) {
             initData();
-            if (geoQuery != null)
-                geoQuery.removeAllListeners();
         }
         else if (MyUser.getInstance().getLocation() != null) {
             initData(MyUser.getInstance().getLocation());
@@ -253,13 +259,14 @@ public class CritiqueFragment extends Fragment {
 
     public void initData(final Location location) {
         if (CritiqueFragment.this.isVisible()) {
+            Log.d("path", "filling location");
             geoQuery = geoFire.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), 500);
             geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
                 @Override
                 public void onKeyEntered(String key, GeoLocation location) {
                     outOfUsers(false);
                     Log.d("onKeyEntered", key);
-                    populateFromKey(key);
+                    userQueue.add(key);
                 }
 
                 @Override
@@ -305,27 +312,47 @@ public class CritiqueFragment extends Fragment {
             geoQuery.removeAllListeners();
         }
         Log.d("path", "initData");
-        MainActivity.rootRef.child("user_index").addChildEventListener(new ChildEventListener() {
+
+        Query query;
+        if (lastKnownKey == null) {
+            query = MainActivity.rootRef.child("user_index").orderByKey().limitToFirst(3);
+        }
+        else {
+            query = MainActivity.rootRef.child("user_index").orderByKey().limitToFirst(3).startAt(lastKnownKey);
+        }
+        query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("dataSnapshot", dataSnapshot.getValue().toString());
                 if (!MyUser.getInstance().seen(dataSnapshot.getValue().toString()))
-                    populateFromKey(dataSnapshot.getValue().toString());
+                    userQueue.add(dataSnapshot.getValue().toString());
+                lastKnownKey = dataSnapshot.getValue().toString();
             }
+
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
+
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
             @Override
-            public void onCancelled(FirebaseError firebaseError) { }
+            public void onCancelled(FirebaseError firebaseError) {
+            }
         });
-        MainActivity.rootRef.child("user_index").addListenerForSingleValueEvent(new ValueEventListener() {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (users.size() == 0) {
+                if (userQueue.isEmpty()) {
                     outOfUsers(true);
+                }
+                else {
+                    populateFromKey(userQueue.poll());
                 }
             }
 
@@ -337,7 +364,7 @@ public class CritiqueFragment extends Fragment {
     }
 
     private void populateFromKey(final String key) {
-        Log.d("path", "populateFromKey");
+        Log.d("populateFromKey", key);
         if (!key.equals(MyUser.getInstance().getUID()) && !MyUser.getInstance().seen(key) && !seenBuffer.contains(key)) {
             seenBuffer.add(key);
             MainActivity.rootRef.child("users").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
