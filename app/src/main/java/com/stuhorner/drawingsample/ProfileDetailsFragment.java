@@ -66,14 +66,8 @@ public class ProfileDetailsFragment extends Fragment {
     }
 
     private void saveText() {
-        /*SharedPreferences sharedPref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(getString(R.string.profile_text), textView.getText().toString());
-        editor.apply();*/
-
         MyUser.getInstance().setProfileText(textView.getText().toString());
     }
-
 
     private void initData(View view){
         getAge(view);
@@ -91,7 +85,7 @@ public class ProfileDetailsFragment extends Fragment {
     }
 
     private void getAge(final View view) {
-        ref.child("users").child(UID).child("age").addListenerForSingleValueEvent(new ValueEventListener() {
+        ref.child("users").child(UID).child("age").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 TextView textView = (TextView) view.findViewById(R.id.profile_age);
@@ -108,7 +102,7 @@ public class ProfileDetailsFragment extends Fragment {
     }
 
     private void getSex(final View view) {
-        ref.child("users").child(UID).child("gender").addListenerForSingleValueEvent(new ValueEventListener() {
+        ref.child("users").child(UID).child("gender").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 TextView textView = (TextView) view.findViewById(R.id.profile_gender);
@@ -153,5 +147,11 @@ public class ProfileDetailsFragment extends Fragment {
             public void onCancelled(FirebaseError firebaseError) {
             }
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
     }
 }

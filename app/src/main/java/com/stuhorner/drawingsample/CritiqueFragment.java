@@ -61,10 +61,11 @@ public class CritiqueFragment extends Fragment {
         progressBar = (ProgressBar) view.findViewById(R.id.critique_progress);
         adapter = new CardAdapter(getActivity().getApplicationContext(),users, progressBar);
         flingContainer.setAdapter(adapter);
+
         handleCardSwipes();
         handleButtons();
-        //handleNearMe();
         populateApprovals();
+
         return view;
     }
 
@@ -78,10 +79,11 @@ public class CritiqueFragment extends Fragment {
 
             @Override
             public void removeFirstObjectInAdapter() {
-                MyUser.getInstance().swiped(users.get(0).getUID());
+
+                /*MyUser.getInstance().swiped(users.get(0).getUID());
                 users.remove(0);
                 adapter.notifyDataSetChanged();
-                updateProgressBar();
+                updateProgressBar();*/
             }
 
             @Override
@@ -104,11 +106,13 @@ public class CritiqueFragment extends Fragment {
 
             @Override
             public void onAdapterAboutToEmpty(int itemsInAdapter) {
+                /*
                 if (userQueue.isEmpty())
                     handleNearMe();
                 else {
                     populateFromKey(userQueue.poll());
                 }
+                */
             }
 
             @Override
@@ -185,7 +189,7 @@ public class CritiqueFragment extends Fragment {
         SharedPreferences pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
         isMaleOn = pref.getBoolean("isMaleOn", true);
         isFemaleOn = pref.getBoolean("isFemaleOn", true);
-        minAge = pref.getInt("minAge", 18);
+        minAge = pref.getInt("minAge", MainActivity.MIN_AGE_ALLOWED);
         maxAge = pref.getInt("maxAge", 70);
     }
 
@@ -259,7 +263,6 @@ public class CritiqueFragment extends Fragment {
 
     public void initData(final Location location) {
         if (CritiqueFragment.this.isVisible()) {
-            Log.d("path", "filling location");
             geoQuery = geoFire.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), 500);
             geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
                 @Override
@@ -311,7 +314,6 @@ public class CritiqueFragment extends Fragment {
         if (geoQuery != null) {
             geoQuery.removeAllListeners();
         }
-        Log.d("path", "initData");
 
         Query query;
         if (lastKnownKey == null) {

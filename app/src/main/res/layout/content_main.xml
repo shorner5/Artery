@@ -86,7 +86,6 @@
                 android:layout_weight=".5"
                 android:elevation="8dp"
                 android:src="@color/compliment"
-
                 />
 
             <ImageButton

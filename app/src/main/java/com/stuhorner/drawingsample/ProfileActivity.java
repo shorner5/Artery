@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -268,13 +269,15 @@ public class ProfileActivity extends AppCompatActivity{
 
     public void editSex(View v) {
         if (editting) {
-
+            DialogFragment newFragment = ProfileEditDialog.newInstance(ProfileEditDialog.EDIT_GENDER);
+            newFragment.show(getSupportFragmentManager(), "dialog");
         }
     }
 
     public void editAge(View v) {
         if (editting) {
-
+            DialogFragment newFragment = ProfileEditDialog.newInstance(ProfileEditDialog.EDIT_AGE);
+            newFragment.show(getSupportFragmentManager(), "dialog");
         }
     }
 }
