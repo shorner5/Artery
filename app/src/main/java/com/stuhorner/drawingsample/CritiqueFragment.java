@@ -16,8 +16,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -46,10 +44,12 @@ public class CritiqueFragment extends Fragment {
     ImageButton yesButton, noButton;
     GeoFire geoFire = new GeoFire(new Firebase("https://artery.firebaseio.com"));
     ProgressBar progressBar;
+    TextView outOfUsers;
     boolean near_me, isMaleOn, isFemaleOn;
     int minAge, maxAge;
     HashSet<String> seenBuffer = new HashSet<>();
     GeoQuery geoQuery;
+    boolean locationQueried = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
@@ -59,6 +59,7 @@ public class CritiqueFragment extends Fragment {
         yesButton = (ImageButton) view.findViewById(R.id.yes_button);
         noButton = (ImageButton) view.findViewById(R.id.no_button);
         progressBar = (ProgressBar) view.findViewById(R.id.critique_progress);
+        outOfUsers = (TextView) view.findViewById(R.id.outOfUsers);
         adapter = new CardAdapter(getActivity().getApplicationContext(),users, progressBar);
         flingContainer.setAdapter(adapter);
 
@@ -79,11 +80,12 @@ public class CritiqueFragment extends Fragment {
 
             @Override
             public void removeFirstObjectInAdapter() {
-
-                /*MyUser.getInstance().swiped(users.get(0).getUID());
+                Log.d("removed", users.get(0).getName());
+                MyUser.getInstance().swiped(users.get(0).getUID());
                 users.remove(0);
+                updateProgressBar();
+                outOfUsers();
                 adapter.notifyDataSetChanged();
-                updateProgressBar();*/
             }
 
             @Override
@@ -106,13 +108,13 @@ public class CritiqueFragment extends Fragment {
 
             @Override
             public void onAdapterAboutToEmpty(int itemsInAdapter) {
-                /*
-                if (userQueue.isEmpty())
+                Log.d("onAdapterAboutToEmpty", Integer.toString(itemsInAdapter));
+                if (userQueue.isEmpty()) {
                     handleNearMe();
+                }
                 else {
                     populateFromKey(userQueue.poll());
                 }
-                */
             }
 
             @Override
@@ -177,11 +179,11 @@ public class CritiqueFragment extends Fragment {
     }
 
     private void updateProgressBar() {
-        if (users.size() > 0) {
-            progressBar.setVisibility(View.INVISIBLE);
+        if (users.isEmpty()) {
+            progressBar.setVisibility(View.VISIBLE);
         }
         else {
-            progressBar.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -194,14 +196,19 @@ public class CritiqueFragment extends Fragment {
     }
 
     private void handleNearMe() {
-        Log.d("handleNearMe", "here");
         SharedPreferences pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
         near_me = pref.getBoolean("near_me", true);
-        if (!near_me) {
-            initData();
+        if (near_me && MyUser.getInstance().getLocation() != null) {
+            if (!locationQueried) {
+                initData(MyUser.getInstance().getLocation());
+                locationQueried = true;
+            }
+            else {
+                outOfUsers();
+            }
         }
-        else if (MyUser.getInstance().getLocation() != null) {
-            initData(MyUser.getInstance().getLocation());
+        else if (!near_me) {
+            initData();
         }
     }
 
@@ -235,7 +242,7 @@ public class CritiqueFragment extends Fragment {
     private void launchMatch(String name, String UID) {
         sendEmptyMessage(UID);
         MatchOverlayFragment match = MatchOverlayFragment.newInstance(name, UID);
-        match.show(getActivity().getFragmentManager(), "hello");
+        match.show(getActivity().getFragmentManager(), "match");
     }
 
     private void addAnimation(final ImageButton button) {
@@ -262,99 +269,92 @@ public class CritiqueFragment extends Fragment {
     }
 
     public void initData(final Location location) {
-        if (CritiqueFragment.this.isVisible()) {
-            geoQuery = geoFire.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), 500);
-            geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-                @Override
-                public void onKeyEntered(String key, GeoLocation location) {
-                    outOfUsers(false);
-                    Log.d("onKeyEntered", key);
+        Log.d("called initData", "here");
+        geoQuery = geoFire.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), 20);
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                Log.d("onKeyEntered", key);
+                if (!key.equals(MyUser.getInstance().getUID()) && !MyUser.getInstance().seen(key) && !seenBuffer.contains(key)) {
+                    Log.d("add key", key);
                     userQueue.add(key);
+                    seenBuffer.add(key);
                 }
+            }
 
-                @Override
-                public void onKeyExited(String key) {
+            @Override
+            public void onKeyExited(String key) {
 
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+                Log.d("onGeoQueryReady", Integer.toString(userQueue.size()));
+                if (userQueue.isEmpty()) {
+                    outOfUsers();
                 }
-
-                @Override
-                public void onKeyMoved(String key, GeoLocation location) {
-
+                else {
+                    populateFromKey(userQueue.poll());
                 }
+            }
 
-                @Override
-                public void onGeoQueryReady() {
-                    if (users.size() == 0) {
-                        outOfUsers(true);
-                    }
-                }
-
-                @Override
-                public void onGeoQueryError(FirebaseError error) {
-
-                }
-            });
-        }
+            @Override
+            public void onGeoQueryError(FirebaseError error) {
+                Log.d("onGeoError", error.getDetails());
+                outOfUsers();
+            }
+        });
     }
 
-    private void outOfUsers(boolean outOfUsers) {
-        if (getView() != null) {
-            TextView text = (TextView) getView().findViewById(R.id.outOfUsers);
-            if (outOfUsers) {
-                text.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.INVISIBLE);
-            }
-            else {
-                text.setVisibility(View.INVISIBLE);
-            }
+    private void outOfUsers() {
+        updateProgressBar();
+        if (users.isEmpty() && userQueue.isEmpty()) {
+            outOfUsers.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.INVISIBLE);
+        }
+        else {
+            outOfUsers.setVisibility(View.INVISIBLE);
         }
     }
 
     public void initData() {
+        //remove geoQuery listeners
         if (geoQuery != null) {
             geoQuery.removeAllListeners();
         }
 
         Query query;
         if (lastKnownKey == null) {
-            query = MainActivity.rootRef.child("user_index").orderByKey().limitToFirst(3);
+            query = MainActivity.rootRef.child("user_index").orderByKey().limitToFirst(10);
         }
         else {
-            query = MainActivity.rootRef.child("user_index").orderByKey().limitToFirst(3).startAt(lastKnownKey);
+            Log.d("lastKnownKey", lastKnownKey);
+            query = MainActivity.rootRef.child("user_index").orderByKey().startAt(lastKnownKey).limitToFirst(10);
         }
-        query.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d("dataSnapshot", dataSnapshot.getValue().toString());
-                if (!MyUser.getInstance().seen(dataSnapshot.getValue().toString()))
-                    userQueue.add(dataSnapshot.getValue().toString());
-                lastKnownKey = dataSnapshot.getValue().toString();
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-            }
-        });
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (userQueue.isEmpty()) {
-                    outOfUsers(true);
+                Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
+                while (iterator.hasNext()) {
+                    DataSnapshot data = iterator.next();
+                    String key = data.getValue().toString();
+                    lastKnownKey = data.getKey();
+                    if (!key.equals(MyUser.getInstance().getUID()) && !MyUser.getInstance().seen(key) && !seenBuffer.contains(key)) {
+                        userQueue.add(key);
+                        seenBuffer.add(key);
+                    }
+                }
+                if (!userQueue.isEmpty()) {
+                    Log.d("path", "populateFromKey");
+                    populateFromKey(userQueue.poll());
                 }
                 else {
-                    populateFromKey(userQueue.poll());
+                    outOfUsers();
                 }
             }
 
@@ -366,41 +366,112 @@ public class CritiqueFragment extends Fragment {
     }
 
     private void populateFromKey(final String key) {
-        Log.d("populateFromKey", key);
-        if (!key.equals(MyUser.getInstance().getUID()) && !MyUser.getInstance().seen(key) && !seenBuffer.contains(key)) {
-            seenBuffer.add(key);
-            MainActivity.rootRef.child("users").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+        //create the OtherUser object
+        if (getContext() != null) {
+            final OtherUser user = new OtherUser(getContext());
+            //get name
+            MainActivity.rootRef.child("users").child(key).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (getContext() != null) {
-                        OtherUser user = new OtherUser(getContext());
-                        user.setName(dataSnapshot.child("name").getValue().toString());
-                        user.setAge(Integer.parseInt(dataSnapshot.child("age").getValue().toString()));
-                        if (dataSnapshot.child("card").getValue() != null)
-                            user.setCard(dataSnapshot.child("card").getValue().toString());
-                        if (dataSnapshot.child("gender").getValue() != null)
-                            user.setGender(Integer.parseInt(dataSnapshot.child("gender").getValue().toString()));
+                    if (dataSnapshot.getValue() != null) {
+                        user.setName(dataSnapshot.getValue().toString());
                         user.setUID(key);
-
-                        if (approveUser(user)) {
-                            users.add(user);
-                            Log.d("added user", user.getName());
-                            adapter.notifyDataSetChanged();
-                            updateProgressBar();
-                            outOfUsers(false);
-                        }
+                        Log.d("path", "calling getAge");
+                        getAge(user);
                     }
+                    else if (users.isEmpty() && !userQueue.isEmpty()) {
+                        populateFromKey(userQueue.poll());
+                    }
+                    outOfUsers();
                 }
 
                 @Override
                 public void onCancelled(FirebaseError firebaseError) {
+
                 }
             });
         }
     }
 
+    private void getAge(final OtherUser user) {
+        MainActivity.rootRef.child("users").child(user.getUID()).child("age").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    user.setAge(Integer.parseInt(dataSnapshot.getValue().toString()));
+                    Log.d("path", "calling getGender");
+                    getGender(user);
+                }
+                else if (users.isEmpty() && !userQueue.isEmpty()) {
+                    populateFromKey(userQueue.poll());
+                }
+                outOfUsers();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+    }
+
+    private void getGender(final OtherUser user) {
+        MainActivity.rootRef.child("users").child(user.getUID()).child("gender").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    user.setGender(Integer.parseInt(dataSnapshot.getValue().toString()));
+                    if (approveUser(user)) {
+                        Log.d("path", "calling getCard");
+                        getCard(user);
+                    }
+                    else if (users.isEmpty() && !userQueue.isEmpty()) {
+                        populateFromKey(userQueue.poll());
+                    }
+                    outOfUsers();
+                }
+                else if (users.isEmpty() && !userQueue.isEmpty()) {
+                    populateFromKey(userQueue.poll());
+                }
+                outOfUsers();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+    }
+
+    private void getCard(final OtherUser user) {
+        MainActivity.rootRef.child("users").child(user.getUID()).child("card").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("path", "getCard-onDataChange " + user.getUID() + ", " + user.getUID());
+                if (dataSnapshot.getValue() != null) {
+                    Log.d("path", "value is not null");
+                    user.setCard(dataSnapshot.getValue().toString());
+                    users.add(user);
+                    adapter.notifyDataSetChanged();
+                    outOfUsers();
+                    Log.d("added user", user.getName());
+                    Log.d("user size", Integer.toString(users.size()));
+                }
+                else if (users.isEmpty() && !userQueue.isEmpty()) {
+                    Log.d("path", "calling populateFromKey cuz canceled");
+                    populateFromKey(userQueue.poll());
+                }
+                outOfUsers();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+        });
+    }
+
     private boolean approveUser(OtherUser user) {
-        Log.d("path", "approveUser");
+        Log.d("path", "at approveUser");
         if ((user.getAge() <= maxAge || maxAge == 70) && user.getAge() >= minAge) {
             //both on
             if ((isMaleOn && isFemaleOn)) {
@@ -424,11 +495,24 @@ public class CritiqueFragment extends Fragment {
 
     private void sendEmptyMessage(String UID) {
         Message messageToSend = new Message("", "");
-        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
-        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
-        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).child("metadata").child("last_message").setValue(messageToSend);
-        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).child("metadata").child("last_message").setValue(messageToSend);
-        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).push().setValue(messageToSend);
-        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).push().setValue(messageToSend);
+        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).
+                child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
+        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).
+                child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
+        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).
+                child("metadata").child("last_message").setValue(messageToSend);
+        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).
+                child("metadata").child("last_message").setValue(messageToSend);
+        MainActivity.rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID).
+                push().setValue(messageToSend);
+        MainActivity.rootRef.child("messages").child(UID).child(MyUser.getInstance().getUID()).
+                push().setValue(messageToSend);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (geoQuery != null)
+            geoQuery.removeAllListeners();
     }
 }

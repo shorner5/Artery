@@ -42,7 +42,6 @@ public class FirebaseNotifService extends Service {
             ref.child("messages").child(UID).addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    Log.d("onChildAdded", dataSnapshot.toString());
                 }
 
                 @Override

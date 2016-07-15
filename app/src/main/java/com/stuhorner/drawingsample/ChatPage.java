@@ -167,9 +167,6 @@ public class ChatPage extends AppCompatActivity {
     }
 
     private void initMessages() {
-        Log.d(MyUser.getInstance().getUID(), "a");
-        Log.d(UID, "a");
-
         ref = rootRef.child("messages").child(MyUser.getInstance().getUID()).child(UID);
         ref.addChildEventListener(new ChildEventListener() {
             @Override

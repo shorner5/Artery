@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             ActivityCompat.requestPermissions(this, new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_LOCATION);
         }
         else {
-            new MyLocationListener(this, (ImageButton) findViewById(R.id.filter_near_me), (ImageButton) findViewById(R.id.filter_public), fragment);
+            new MyLocationListener(this, (ImageButton) findViewById(R.id.filter_near_me), (ImageButton) findViewById(R.id.filter_public), fragment, getSupportFragmentManager());
         }
         //start notification activity
         Intent serviceIntent = new Intent(MainActivity.this, FirebaseNotifService.class);
@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResult) {
         if (requestCode == PERMISSION_LOCATION && grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED) {
-            new MyLocationListener(this, (ImageButton) findViewById(R.id.filter_near_me), (ImageButton) findViewById(R.id.filter_public), fragment);
+            new MyLocationListener(this, (ImageButton) findViewById(R.id.filter_near_me), (ImageButton) findViewById(R.id.filter_public), fragment, getSupportFragmentManager());
         }
         if (requestCode == PERMISSION_STORAGE)
             ((DrawFragment)getSupportFragmentManager().findFragmentByTag("DRAW_FRAG")).saveImage(true);
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.d("onActivityResult", Integer.toString(requestCode));
         if (requestCode == 1) {
 
-            new MyLocationListener(this, (ImageButton)findViewById(R.id.filter_near_me), (ImageButton)findViewById(R.id.filter_public), fragment);
+            new MyLocationListener(this, (ImageButton)findViewById(R.id.filter_near_me), (ImageButton)findViewById(R.id.filter_public), fragment, getSupportFragmentManager());
 
             final android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(this, R.style.AppTheme_PopupOverlay);
             alertDialogBuilder.setTitle(R.string.welcome_title);
@@ -458,7 +458,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             ActivityCompat.requestPermissions(this, new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
                         }
                         else {
-                            new MyLocationListener(this, button, (ImageButton) findViewById(R.id.filter_public), (CritiqueFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame));
+                            new MyLocationListener(this, button, (ImageButton) findViewById(R.id.filter_public),
+                                    (CritiqueFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame),
+                                    getSupportFragmentManager());
                         }
                     }
                 }

@@ -33,13 +33,16 @@ public class MyLocationListener implements LocationListener {
     public static boolean hasLocation = false;
     ImageButton filter_near_me, filter_public;
     CritiqueFragment critiqueFragment;
+    android.support.v4.app.FragmentManager fragmentManager;
 
     // call "new MyLocationListener(this) from an activity to instantiate.
-    public MyLocationListener(Activity activity, @Nullable ImageButton filter_near_me, @Nullable ImageButton filter_public, CritiqueFragment critiqueFragment) {
+    public MyLocationListener(Activity activity, @Nullable ImageButton filter_near_me, @Nullable ImageButton filter_public, CritiqueFragment critiqueFragment,
+                              android.support.v4.app.FragmentManager fragmentManager) {
         this.activity = activity;
         this.filter_near_me = filter_near_me;
         this.filter_public = filter_public;
         this.critiqueFragment = critiqueFragment;
+        this.fragmentManager = fragmentManager;
         locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
@@ -64,7 +67,8 @@ public class MyLocationListener implements LocationListener {
             Log.d("Lat", Double.toString(location.getLatitude()));
             Log.d("Long", Double.toString(location.getLongitude()));
             geoFire.setLocation(MyUser.getInstance().getUID(), new GeoLocation(location.getLatitude(), location.getLongitude()));
-            critiqueFragment.initData(location);
+            if (fragmentManager.findFragmentById(R.id.content_frame) instanceof CritiqueFragment)
+                fragmentManager.beginTransaction().replace(R.id.content_frame, new CritiqueFragment()).commit();
             close();
         }
     }
@@ -89,7 +93,8 @@ public class MyLocationListener implements LocationListener {
                 SharedPreferences.Editor pref = activity.getSharedPreferences("data", Context.MODE_PRIVATE).edit();
                 pref.putBoolean("near_me", false);
                 pref.apply();
-                critiqueFragment.initData();
+                if (fragmentManager.findFragmentById(R.id.content_frame) instanceof CritiqueFragment)
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, new CritiqueFragment()).commit();
                 dialog.dismiss();
                 close();
             }
