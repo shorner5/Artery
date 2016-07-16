@@ -12,6 +12,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -68,7 +69,7 @@ public class MyLocationListener implements LocationListener {
             Log.d("Long", Double.toString(location.getLongitude()));
             geoFire.setLocation(MyUser.getInstance().getUID(), new GeoLocation(location.getLatitude(), location.getLongitude()));
             if (fragmentManager.findFragmentById(R.id.content_frame) instanceof CritiqueFragment)
-                fragmentManager.beginTransaction().replace(R.id.content_frame, new CritiqueFragment()).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, new CritiqueFragment()).commitAllowingStateLoss();
             close();
         }
     }
@@ -94,7 +95,7 @@ public class MyLocationListener implements LocationListener {
                 pref.putBoolean("near_me", false);
                 pref.apply();
                 if (fragmentManager.findFragmentById(R.id.content_frame) instanceof CritiqueFragment)
-                    fragmentManager.beginTransaction().replace(R.id.content_frame, new CritiqueFragment()).commit();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, new CritiqueFragment()).commitAllowingStateLoss();
                 dialog.dismiss();
                 close();
             }

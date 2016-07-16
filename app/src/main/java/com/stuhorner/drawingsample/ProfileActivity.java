@@ -1,17 +1,21 @@
 package com.stuhorner.drawingsample;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -115,14 +119,14 @@ public class ProfileActivity extends AppCompatActivity{
     }
 
     private void initMyProfile() {
-        if (MyUser.getInstance().getName() != null && getSupportActionBar() != null) {
+        if (MyUser.getInstance() != null && getSupportActionBar() != null) {
             getSupportActionBar().setTitle(MyUser.getInstance().getName());
-        }
-        if (MyUser.getInstance().getProfilePicture() != null) {
-            String profilePicture = MyUser.getInstance().getProfilePicture();
-            byte[] bytes = Base64.decode(profilePicture.getBytes(), Base64.DEFAULT);
-            Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-            backdrop.setImageBitmap(bm);
+            if (MyUser.getInstance().getProfilePicture() != null) {
+                String profilePicture = MyUser.getInstance().getProfilePicture();
+                byte[] bytes = Base64.decode(profilePicture.getBytes(), Base64.DEFAULT);
+                Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                backdrop.setImageBitmap(bm);
+            }
         }
         else {
             initData();
@@ -162,9 +166,32 @@ public class ProfileActivity extends AppCompatActivity{
         changeProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GET_FROM_GALLERY);
+                if (isStoragePermissionGranted()) {
+                    startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GET_FROM_GALLERY);
+                }
             }
         });
+    }
+
+    public  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v("storage","Permission is granted");
+                return true;
+            } else {
+
+                Log.v("storage","Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v("storage","Permission is granted");
+            return true;
+        }
+
+
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

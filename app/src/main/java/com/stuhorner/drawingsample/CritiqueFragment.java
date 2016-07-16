@@ -84,6 +84,7 @@ public class CritiqueFragment extends Fragment {
                 MyUser.getInstance().swiped(users.get(0).getUID());
                 users.remove(0);
                 updateProgressBar();
+                Log.d("outOfUsers", "removeFirstObjectInAdapter");
                 outOfUsers();
                 adapter.notifyDataSetChanged();
             }
@@ -108,7 +109,7 @@ public class CritiqueFragment extends Fragment {
 
             @Override
             public void onAdapterAboutToEmpty(int itemsInAdapter) {
-                Log.d("onAdapterAboutToEmpty", Integer.toString(itemsInAdapter));
+                Log.d("onAdapterAboutToEmpty", Integer.toString(itemsInAdapter) + ", " + Integer.toString(userQueue.size()));
                 if (userQueue.isEmpty()) {
                     handleNearMe();
                 }
@@ -204,6 +205,7 @@ public class CritiqueFragment extends Fragment {
                 locationQueried = true;
             }
             else {
+                Log.d("outOfUsers", "handleNearMe");
                 outOfUsers();
             }
         }
@@ -280,6 +282,9 @@ public class CritiqueFragment extends Fragment {
                     userQueue.add(key);
                     seenBuffer.add(key);
                 }
+                if (!userQueue.isEmpty() && users.isEmpty()) {
+                    populateFromKey(userQueue.poll());
+                }
             }
 
             @Override
@@ -295,12 +300,7 @@ public class CritiqueFragment extends Fragment {
             @Override
             public void onGeoQueryReady() {
                 Log.d("onGeoQueryReady", Integer.toString(userQueue.size()));
-                if (userQueue.isEmpty()) {
-                    outOfUsers();
-                }
-                else {
-                    populateFromKey(userQueue.poll());
-                }
+                geoQuery.removeAllListeners();
             }
 
             @Override
@@ -316,6 +316,7 @@ public class CritiqueFragment extends Fragment {
         if (users.isEmpty() && userQueue.isEmpty()) {
             outOfUsers.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.INVISIBLE);
+            Log.d("outOfUsers", "VISIBLE");
         }
         else {
             outOfUsers.setVisibility(View.INVISIBLE);
@@ -354,6 +355,7 @@ public class CritiqueFragment extends Fragment {
                     populateFromKey(userQueue.poll());
                 }
                 else {
+                    Log.d("outOfUsers", "initData");
                     outOfUsers();
                 }
             }
@@ -382,7 +384,11 @@ public class CritiqueFragment extends Fragment {
                     else if (users.isEmpty() && !userQueue.isEmpty()) {
                         populateFromKey(userQueue.poll());
                     }
-                    outOfUsers();
+                    else {
+                        Log.d("outOfUsers", "populateFromKey " + key);
+                        outOfUsers();
+                    }
+
                 }
 
                 @Override
@@ -405,7 +411,10 @@ public class CritiqueFragment extends Fragment {
                 else if (users.isEmpty() && !userQueue.isEmpty()) {
                     populateFromKey(userQueue.poll());
                 }
-                outOfUsers();
+                else {
+                    Log.d("outOfUsers", "getAge");
+                    outOfUsers();
+                }
             }
 
             @Override
@@ -428,12 +437,18 @@ public class CritiqueFragment extends Fragment {
                     else if (users.isEmpty() && !userQueue.isEmpty()) {
                         populateFromKey(userQueue.poll());
                     }
-                    outOfUsers();
+                    else {
+                        Log.d("outOfUsers", "getGender");
+                        outOfUsers();
+                    }
                 }
                 else if (users.isEmpty() && !userQueue.isEmpty()) {
                     populateFromKey(userQueue.poll());
                 }
-                outOfUsers();
+                else {
+                    Log.d("outOfUsers", "getGender2, " + user.getUID());
+                    outOfUsers();
+                }
             }
 
             @Override
@@ -447,12 +462,13 @@ public class CritiqueFragment extends Fragment {
         MainActivity.rootRef.child("users").child(user.getUID()).child("card").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("path", "getCard-onDataChange " + user.getUID() + ", " + user.getUID());
+                Log.d("path", "getCard-onDataChange " + user.getUID());
                 if (dataSnapshot.getValue() != null) {
                     Log.d("path", "value is not null");
                     user.setCard(dataSnapshot.getValue().toString());
                     users.add(user);
                     adapter.notifyDataSetChanged();
+                    Log.d("outOfUsers", "getCard");
                     outOfUsers();
                     Log.d("added user", user.getName());
                     Log.d("user size", Integer.toString(users.size()));
@@ -461,7 +477,10 @@ public class CritiqueFragment extends Fragment {
                     Log.d("path", "calling populateFromKey cuz canceled");
                     populateFromKey(userQueue.poll());
                 }
-                outOfUsers();
+                else {
+                    Log.d("outOfUsers", "getCard2");
+                    outOfUsers();
+                }
             }
 
             @Override

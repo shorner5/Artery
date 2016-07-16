@@ -1,17 +1,23 @@
 package com.stuhorner.drawingsample;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -21,6 +27,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 /**
  * Created by Stu on 4/8/2016.
@@ -28,7 +35,9 @@ import android.widget.EditText;
 public class FirstLaunchAddProfileFragment extends Fragment {
     EditText editText;
     boolean genderSelected = false;
+    Button addPicture;
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
 
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fl_add_profile, container, false);
         Intent intent = new Intent();
@@ -36,7 +45,7 @@ public class FirstLaunchAddProfileFragment extends Fragment {
         getActivity().setIntent(intent);
 
         final Button skip = (Button) rootView.findViewById(R.id.button_skip);
-        Button addPicture = (Button) rootView.findViewById(R.id.button_profile_picture);
+        addPicture = (Button) rootView.findViewById(R.id.button_profile_picture);
         Button genderMale = (Button) rootView.findViewById(R.id.button_gender_male);
         Button genderFemale = (Button) rootView.findViewById(R.id.button_gender_female);
         Button genderNeither = (Button) rootView.findViewById(R.id.button_gender_neither);
@@ -116,13 +125,15 @@ public class FirstLaunchAddProfileFragment extends Fragment {
                 }
                 break;
             case R.id.button_profile_picture:
-                startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), ProfileActivity.GET_FROM_GALLERY);
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        button.setText(getString(R.string.select_different_picture));
-                    }
-                }, 1000);
+                if (isStoragePermissionGranted()) {
+                    startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), ProfileActivity.GET_FROM_GALLERY);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            button.setText(getString(R.string.select_different_picture));
+                        }
+                    }, 1000);
+                }
                 break;
             case R.id.button_gender_male:
                 clearGender();
@@ -175,6 +186,36 @@ public class FirstLaunchAddProfileFragment extends Fragment {
             if (cursor != null) {
                 cursor.close();
             }
+        }
+    }
+
+    public  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v("storage","Permission is granted");
+                return true;
+            } else {
+                Log.v("storage","Permission is revoked");
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v("storage","Permission is granted");
+            return true;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
+            //if permission granted
+        }
+        else {
+            //if permission not granted
+            Toast.makeText(getContext(), getString(R.string.mssing_storage_perm), Toast.LENGTH_LONG).show();
         }
     }
 }

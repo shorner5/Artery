@@ -68,23 +68,25 @@ public class FirstLaunchCreateLoginFragment extends Fragment {
                             rootRef.authWithPassword(email.getText().toString(), password.getText().toString(), new Firebase.AuthResultHandler() {
                                 @Override
                                 public void onAuthenticated(AuthData authData) {
-                                    MyUser.getInstance().setUID(result.get("uid"));
-                                    //save UID
-                                    rootRef.child("user_index").push().setValue(result.get("uid"));
-                                    SharedPreferences.Editor pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE).edit();
-                                    pref.putString("UID", MyUser.getInstance().getUID());
-                                    pref.commit();
+                                    if (MyUser.getInstance() != null) {
+                                        MyUser.getInstance().setUID(result.get("uid"));
+                                        //save UID
+                                        rootRef.child("user_index").push().setValue(result.get("uid"));
+                                        SharedPreferences.Editor pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE).edit();
+                                        pref.putString("UID", MyUser.getInstance().getUID());
+                                        pref.commit();
 
-                                    //set name and age
-                                    SharedPreferences getData = getActivity().getPreferences(Context.MODE_PRIVATE);
-                                    MyUser.getInstance().setName(getData.getString("Username", null));
-                                    MyUser.getInstance().setAge(getData.getInt("age", 0));
+                                        //set name and age
+                                        SharedPreferences getData = getActivity().getPreferences(Context.MODE_PRIVATE);
+                                        MyUser.getInstance().setName(getData.getString("Username", null));
+                                        MyUser.getInstance().setAge(getData.getInt("age", 0));
 
-                                    MyUser.getInstance().setEmail(email.getText().toString());
-                                    FirstLaunchActivity.mPager.setCurrentItem(FirstLaunchActivity.mPager.getCurrentItem() + 1);
-                                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                    imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
-                                    showLoading(false);
+                                        MyUser.getInstance().setEmail(email.getText().toString());
+                                        FirstLaunchActivity.mPager.setCurrentItem(FirstLaunchActivity.mPager.getCurrentItem() + 1);
+                                        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                                        imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+                                        showLoading(false);
+                                    }
                                 }
 
                                 @Override

@@ -51,8 +51,10 @@ class BitmapUploadTask extends AsyncTask<String, Void, String> {
             }
             else if (settings == PROFILE_PICTURE) {
                 //set as profile picture
-                MyUser.getInstance().setProfilePicture(result);
-                MyUser.getInstance().setProfilePicturePath(path);
+                if (MyUser.getInstance() != null) {
+                    MyUser.getInstance().setProfilePicture(result);
+                    MyUser.getInstance().setProfilePicturePath(path);
+                }
                 //save to the device
                 if (currentActivity != null) {
                     SharedPreferences sharedPref = currentActivity.getSharedPreferences("data", Context.MODE_PRIVATE);

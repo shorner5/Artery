@@ -125,4 +125,6 @@
     <string name="set_gender">Set Your Gender</string>
     <string name="ok">OK</string>
 
+    <string name="mssing_storage_perm">We need access to your storage to add a profile picture! The default one is nice too though.</string>
+
 </resources>

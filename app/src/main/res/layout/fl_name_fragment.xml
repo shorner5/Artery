@@ -20,7 +20,7 @@
         android:id="@+id/input_name"
         android:hint="@string/name_input"
         android:focusable="true"
-        android:inputType="textCapWords|textVisiblePassword"
+        android:inputType="textNoSuggestions|textCapWords"
         android:textColorHint="@android:color/white"
         android:textColor="@android:color/white"
         android:textStyle="italic"

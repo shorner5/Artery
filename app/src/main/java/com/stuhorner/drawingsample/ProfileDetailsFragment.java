@@ -31,6 +31,7 @@ public class ProfileDetailsFragment extends Fragment {
     String profileText;
     ProgressBar bar;
     Firebase ref = new Firebase("https://artery.firebaseio.com/");
+    ValueEventListener sexListener, ageListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
@@ -85,7 +86,7 @@ public class ProfileDetailsFragment extends Fragment {
     }
 
     private void getAge(final View view) {
-        ref.child("users").child(UID).child("age").addValueEventListener(new ValueEventListener() {
+        ageListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 TextView textView = (TextView) view.findViewById(R.id.profile_age);
@@ -98,15 +99,17 @@ public class ProfileDetailsFragment extends Fragment {
             public void onCancelled(FirebaseError firebaseError) {
 
             }
-        });
+        };
+        ref.child("users").child(UID).child("age").addValueEventListener(ageListener);
+
     }
 
     private void getSex(final View view) {
-        ref.child("users").child(UID).child("gender").addValueEventListener(new ValueEventListener() {
+        sexListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 TextView textView = (TextView) view.findViewById(R.id.profile_gender);
-                if (textView != null) {
+                if (textView != null && dataSnapshot.getValue() != null) {
                     if (dataSnapshot.getValue().toString().equals("0")) {
                         textView.setText(getString(R.string.gender_male));
                     }
@@ -123,7 +126,8 @@ public class ProfileDetailsFragment extends Fragment {
             public void onCancelled(FirebaseError firebaseError) {
 
             }
-        });
+        };
+        ref.child("users").child(UID).child("gender").addValueEventListener(sexListener);
     }
 
     private void checkForText() {
@@ -152,6 +156,7 @@ public class ProfileDetailsFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        ref.child("users").child(UID).child("age").removeEventListener(ageListener);
+        ref.child("users").child(UID).child("gender").removeEventListener(sexListener);
     }
 }

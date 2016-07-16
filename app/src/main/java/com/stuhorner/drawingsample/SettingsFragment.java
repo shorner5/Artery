@@ -62,6 +62,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 MainActivity.rootRef.child("users").child(MyUser.getInstance().getUID()).child("swiped").setValue(null);
+                MainActivity.rootRef.child("users").child(MyUser.getInstance().getUID()).child("right").setValue(null);
                 Snackbar.make(view, "Reset swipes. This does not affect your matches.", Snackbar.LENGTH_SHORT).show();
                 MyUser.getInstance().clearSwiped();
                 return false;
