@@ -206,7 +206,7 @@ public class CritiqueFragment extends Fragment {
             }
             else {
                 Log.d("outOfUsers", "handleNearMe");
-                outOfUsers();
+                //outOfUsers();
             }
         }
         else if (!near_me) {
@@ -282,9 +282,9 @@ public class CritiqueFragment extends Fragment {
                     userQueue.add(key);
                     seenBuffer.add(key);
                 }
-                if (!userQueue.isEmpty() && users.isEmpty()) {
+/*                if (!userQueue.isEmpty() && users.isEmpty()) {
                     populateFromKey(userQueue.poll());
-                }
+                }*/
             }
 
             @Override
@@ -301,12 +301,16 @@ public class CritiqueFragment extends Fragment {
             public void onGeoQueryReady() {
                 Log.d("onGeoQueryReady", Integer.toString(userQueue.size()));
                 geoQuery.removeAllListeners();
+                if (!userQueue.isEmpty() && users.isEmpty()) {
+                    populateFromKey(userQueue.poll());
+                }
+                outOfUsers();
             }
 
             @Override
             public void onGeoQueryError(FirebaseError error) {
                 Log.d("onGeoError", error.getDetails());
-                outOfUsers();
+                //outOfUsers();
             }
         });
     }
@@ -386,7 +390,7 @@ public class CritiqueFragment extends Fragment {
                     }
                     else {
                         Log.d("outOfUsers", "populateFromKey " + key);
-                        outOfUsers();
+                        //outOfUsers();
                     }
 
                 }
@@ -447,7 +451,7 @@ public class CritiqueFragment extends Fragment {
                 }
                 else {
                     Log.d("outOfUsers", "getGender2, " + user.getUID());
-                    outOfUsers();
+                    //outOfUsers();
                 }
             }
 

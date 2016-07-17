@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -92,6 +93,8 @@ public class ProfileActivity extends AppCompatActivity{
         // Inflate the menu; this adds items to the action bar if it is present.
         if (editting) {
             getMenuInflater().inflate(R.menu.menu_drawing_top, menu);
+            if (menu.getItem(0) != null)
+                menu.getItem(0).getIcon().setColorFilter(getResources().getColor(R.color.snow_white), PorterDuff.Mode.SRC_ATOP);
         }
         else if (edittable) {
             getMenuInflater().inflate(R.menu.menu_profile, menu);
