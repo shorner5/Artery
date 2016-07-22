@@ -68,6 +68,9 @@ public class ProfileActivity extends AppCompatActivity{
 
         ImageButton noButton = (ImageButton)findViewById(R.id.p_no_button);
         ImageButton yesButton = (ImageButton)findViewById(R.id.p_yes_button);
+        noButton.setColorFilter(getResources().getColor(R.color.compliment));
+        yesButton.setColorFilter(getResources().getColor(R.color.yes_button_green));
+
         changeProfilePic = (Button)findViewById(R.id.change_picture);
         backdrop = (ImageView) findViewById(R.id.backdrop);
         if (edittable) {
@@ -79,8 +82,8 @@ public class ProfileActivity extends AppCompatActivity{
         setupEdit();
 
         if (buttons_on) {
-            noButton.setVisibility(View.INVISIBLE);
-            yesButton.setVisibility(View.INVISIBLE);
+            if (findViewById(R.id.p_linearlayout) != null)
+                findViewById(R.id.p_linearlayout).setVisibility(View.INVISIBLE);
         }
         else {
             buttonListeners(yesButton);
@@ -237,9 +240,9 @@ public class ProfileActivity extends AppCompatActivity{
     }
 
     private void buttonListeners(final ImageButton button) {
-        final Animation scaleDownYes = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.translate_down);
+        final Animation scaleDownYes = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.scale_down);
         scaleDownYes.setFillAfter(true);
-        final Animation scaleUpYes = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.translate_up);
+        final Animation scaleUpYes = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.scale_up);
         scaleUpYes.setFillAfter(true);
 
         button.setOnTouchListener(new View.OnTouchListener() {

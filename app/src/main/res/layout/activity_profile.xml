@@ -87,26 +87,50 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true">
 
-            <ImageButton
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:padding="0dp"
-                android:id="@+id/p_no_button"
-                android:layout_weight=".5"
-                android:elevation="8dp"
-                android:src="@color/compliment"
-                />
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5">
 
-            <ImageButton
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:padding="0dp"
-                android:id="@+id/p_yes_button"
-                android:layout_weight=".5"
-                android:elevation="8dp"
-                android:src="@color/yes_button_green"
-                />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_margin="8dp"
+                    android:src="@drawable/button_background"
+                    />
 
+                <ImageButton
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_margin="8dp"
+                    android:id="@+id/p_no_button"
+                    android:src="@drawable/ic_no"
+                    android:scaleType="fitCenter"
+                    android:background="@drawable/no_button"
+                    />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_margin="8dp"
+                    android:src="@drawable/button_background"/>
+
+                <ImageButton
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_margin="8dp"
+                    android:padding="4dp"
+                    android:id="@+id/p_yes_button"
+                    android:src="@drawable/ic_yes"
+                    android:scaleType="fitCenter"
+                    android:background="@drawable/yes_button"/>
+            </FrameLayout>
         </LinearLayout>
 
     </RelativeLayout>
