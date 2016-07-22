@@ -58,6 +58,8 @@ public class CritiqueFragment extends Fragment {
         flingContainer = (SwipeFlingAdapterView) view.findViewById(R.id.swipecards);
         yesButton = (ImageButton) view.findViewById(R.id.yes_button);
         noButton = (ImageButton) view.findViewById(R.id.no_button);
+        yesButton.setColorFilter(getResources().getColor(R.color.yes_button_green));
+        noButton.setColorFilter(getResources().getColor(R.color.compliment));
         progressBar = (ProgressBar) view.findViewById(R.id.critique_progress);
         outOfUsers = (TextView) view.findViewById(R.id.outOfUsers);
         adapter = new CardAdapter(getActivity().getApplicationContext(),users, progressBar);
@@ -73,10 +75,10 @@ public class CritiqueFragment extends Fragment {
     private void handleCardSwipes() {
         flingContainer.setFlingListener(new SwipeFlingAdapterView.onFlingListener() {
             boolean noDown = false, yesDown = false;
-            final Animation scaleDownYes = AnimationUtils.loadAnimation(getContext(), R.anim.translate_down);
-            final Animation scaleUpYes = AnimationUtils.loadAnimation(getContext(), R.anim.translate_up);
-            final Animation scaleDownNo = AnimationUtils.loadAnimation(getContext(), R.anim.translate_down);
-            final Animation scaleUpNo = AnimationUtils.loadAnimation(getContext(), R.anim.translate_up);
+            final Animation scaleDownYes = AnimationUtils.loadAnimation(getContext(), R.anim.scale_down);
+            final Animation scaleUpYes = AnimationUtils.loadAnimation(getContext(), R.anim.scale_up);
+            final Animation scaleDownNo = AnimationUtils.loadAnimation(getContext(), R.anim.scale_down);
+            final Animation scaleUpNo = AnimationUtils.loadAnimation(getContext(), R.anim.scale_up);
 
             @Override
             public void removeFirstObjectInAdapter() {
@@ -248,9 +250,9 @@ public class CritiqueFragment extends Fragment {
     }
 
     private void addAnimation(final ImageButton button) {
-        final Animation scaleDown = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.translate_down);
+        final Animation scaleDown = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.scale_down);
         scaleDown.setFillAfter(true);
-        final Animation scaleUp = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.translate_up);
+        final Animation scaleUp = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.scale_up);
         scaleUp.setFillAfter(true);
 
         button.setOnTouchListener(new View.OnTouchListener() {

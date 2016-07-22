@@ -17,6 +17,8 @@
     <color name="snow_white">#F1EFEF</color>
     <color name="yes_button_green">#00bf4d</color>
     <color name="compliment">#b00011</color>
+    <color name="button_background">#7ae9e9e9</color>
+    <color name="button_inside_background">#ffffff</color>
 
     <color name="black_overlay">#66000000</color>
 
