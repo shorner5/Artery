@@ -107,7 +107,7 @@
     <string name="help_title">Draw your first card</string>
     <string name="help_body">This is other user\'s first impression of you, and their first interaction with you. Get creative, and draw anything that represents you. </string>
     <string name="welcome_title">Welcome to Artery!</string>
-    <string name="welcome_body">Swipe right on drawings you like. Swipe left on drawings you don\'t. A match occurs when you and the other person both like each other\'s drawings! To chat with matches, swipe right from the edge.</string>
+    <string name="welcome_body">Swipe right on drawings you like. Swipe left on drawings you don\'t. A match occurs when you and the other person both like each other\'s drawings. To chat with matches, swipe right from the edge.</string>
 
     <string name="no_delete">Can\'t delete!</string>
     <string name="no_delete_body">You must have at least one drawing in your gallery so other users can see you.</string>
@@ -122,7 +122,7 @@
     <string name="new_match">New Match!</string>
 
     <string name="set_age">Set Your New Age</string>
-    <string name="set_gender">Set Your Gender</string>
+    <string name="set_gender">Set Your Sex</string>
     <string name="ok">OK</string>
 
     <string name="mssing_storage_perm">We need access to your storage to add a profile picture! The default one is nice too though.</string>

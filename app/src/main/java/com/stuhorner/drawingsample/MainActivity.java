@@ -75,12 +75,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (pref.getString("UID", null) == null) {
             clearSavedData();
             Intent intent = new Intent(getApplicationContext(), FirstLaunchActivity.class);
-            //startActivityForResult(intent, 1);
             startActivity(intent);
             finish();
         }
         else {
             MyUser.getInstance().populateUser(pref.getString("UID", pref.getString("UID", null)));
+            showWelcome();
         }
 
         fragment = new CritiqueFragment();
@@ -148,20 +148,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             ((DrawFragment)getSupportFragmentManager().findFragmentByTag("DRAW_FRAG")).saveImage(true);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d("onActivityResult", Integer.toString(requestCode));
-        if (requestCode == 1) {
-
-            new MyLocationListener(this, (ImageButton)findViewById(R.id.filter_near_me), (ImageButton)findViewById(R.id.filter_public), fragment, getSupportFragmentManager());
-
+    private void showWelcome() {
+        final SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+        if (pref.getBoolean("first_launch", true)) {
             final android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(this, R.style.AppTheme_PopupOverlay);
             alertDialogBuilder.setTitle(R.string.welcome_title);
             alertDialogBuilder.setMessage(R.string.welcome_body).
                     setPositiveButton("GOT IT", new DialogInterface.OnClickListener() {
                         public void onClick(final DialogInterface dialog, int id) {
                             dialog.dismiss();
+                            SharedPreferences.Editor editor = pref.edit();
+                            editor.putBoolean("first_launch", false);
+                            editor.apply();
                         }
                     });
             alertDialogBuilder.create().show();
