@@ -5,6 +5,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.LightingColorFilter;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.util.Base64;
 
@@ -47,7 +51,6 @@ class BitmapUploadTask extends AsyncTask<String, Void, String> {
         if (result != null) {
             if (settings == ADD_TO_GALLERY) {
                 MyUser.getInstance().addToGallery(result);
-
             }
             else if (settings == PROFILE_PICTURE) {
                 //set as profile picture

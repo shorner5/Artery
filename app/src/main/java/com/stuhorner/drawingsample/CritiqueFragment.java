@@ -47,7 +47,7 @@ public class CritiqueFragment extends Fragment {
     TextView outOfUsers;
     boolean near_me, isMaleOn, isFemaleOn;
     int minAge, maxAge;
-    //HashSet<String> seenBuffer = new HashSet<>();
+    HashSet<String> seenBuffer = new HashSet<>();
     GeoQuery geoQuery;
     boolean locationQueried = false;
 
@@ -279,10 +279,10 @@ public class CritiqueFragment extends Fragment {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
                 Log.d("onKeyEntered", key);
-                if (!key.equals(MyUser.getInstance().getUID()) && !MyUser.getInstance().seen(key) /*&& !seenBuffer.contains(key)*/) {
+                if (!key.equals(MyUser.getInstance().getUID()) && !MyUser.getInstance().seen(key) && !seenBuffer.contains(key)) {
                     Log.d("add key", key);
                     userQueue.add(key);
-                    //seenBuffer.add(key);
+                    seenBuffer.add(key);
                 }
 /*                if (!userQueue.isEmpty() && users.isEmpty()) {
                     populateFromKey(userQueue.poll());
@@ -351,9 +351,9 @@ public class CritiqueFragment extends Fragment {
                     DataSnapshot data = iterator.next();
                     String key = data.getValue().toString();
                     lastKnownKey = data.getKey();
-                    if (!key.equals(MyUser.getInstance().getUID()) && !MyUser.getInstance().seen(key) /*&& !seenBuffer.contains(key)*/) {
+                    if (!key.equals(MyUser.getInstance().getUID()) && !MyUser.getInstance().seen(key) && !seenBuffer.contains(key)) {
                         userQueue.add(key);
-                        //seenBuffer.add(key);
+                        seenBuffer.add(key);
                     }
                 }
                 if (!userQueue.isEmpty()) {
