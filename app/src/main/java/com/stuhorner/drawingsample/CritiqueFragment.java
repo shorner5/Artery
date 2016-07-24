@@ -52,7 +52,7 @@ public class CritiqueFragment extends Fragment {
     boolean locationQueried = false;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.content_main, container, false);
         flingContainer = (SwipeFlingAdapterView) view.findViewById(R.id.swipecards);
@@ -62,7 +62,7 @@ public class CritiqueFragment extends Fragment {
         noButton.setColorFilter(getResources().getColor(R.color.compliment));
         progressBar = (ProgressBar) view.findViewById(R.id.critique_progress);
         outOfUsers = (TextView) view.findViewById(R.id.outOfUsers);
-        adapter = new CardAdapter(getActivity().getApplicationContext(),users, progressBar);
+        adapter = new CardAdapter(getActivity().getApplicationContext(), users, progressBar);
         flingContainer.setAdapter(adapter);
 
         handleCardSwipes();
@@ -101,8 +101,8 @@ public class CritiqueFragment extends Fragment {
 
             @Override
             public void onRightCardExit(Object dataObject) {
-                checkForMatch(((OtherUser)dataObject).getName(), ((OtherUser)dataObject).getUID());
-                MyUser.getInstance().swipeRight(((OtherUser)dataObject).getUID());
+                checkForMatch(((OtherUser) dataObject).getName(), ((OtherUser) dataObject).getUID());
+                MyUser.getInstance().swipeRight(((OtherUser) dataObject).getUID());
                 if (yesDown) {
                     yesDown = false;
                     yesButton.startAnimation(scaleUpYes);
@@ -114,8 +114,7 @@ public class CritiqueFragment extends Fragment {
                 Log.d("onAdapterAboutToEmpty", Integer.toString(itemsInAdapter) + ", " + Integer.toString(userQueue.size()));
                 if (userQueue.isEmpty()) {
                     handleNearMe();
-                }
-                else {
+                } else {
                     populateFromKey(userQueue.poll());
                 }
             }
@@ -184,8 +183,7 @@ public class CritiqueFragment extends Fragment {
     private void updateProgressBar() {
         if (users.isEmpty()) {
             progressBar.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
             progressBar.setVisibility(View.INVISIBLE);
         }
     }
@@ -205,30 +203,28 @@ public class CritiqueFragment extends Fragment {
             if (!locationQueried) {
                 initData(MyUser.getInstance().getLocation());
                 locationQueried = true;
-            }
-            else {
+            } else {
                 Log.d("outOfUsers", "handleNearMe");
                 //outOfUsers();
             }
-        }
-        else if (!near_me) {
+        } else if (!near_me) {
             initData();
         }
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data){
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1) {
-            if (resultCode == ProfileActivity.RESULT_YES){
+            if (resultCode == ProfileActivity.RESULT_YES) {
                 //swipe right
                 flingContainer.getTopCardListener().selectRight();
-            }
-            else if (resultCode == ProfileActivity.RESULT_NO ) {
+            } else if (resultCode == ProfileActivity.RESULT_NO) {
                 //swipe left
                 flingContainer.getTopCardListener().selectLeft();
             }
         }
     }
-    private void handleButtons(){
+
+    private void handleButtons() {
         addAnimation(yesButton);
         addAnimation(noButton);
     }
@@ -306,7 +302,7 @@ public class CritiqueFragment extends Fragment {
                 if (!userQueue.isEmpty() && users.isEmpty()) {
                     populateFromKey(userQueue.poll());
                 }
-                outOfUsers();
+                isQueueExhausted();
             }
 
             @Override
@@ -323,8 +319,7 @@ public class CritiqueFragment extends Fragment {
             outOfUsers.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.INVISIBLE);
             Log.d("outOfUsers", "VISIBLE");
-        }
-        else {
+        } else {
             outOfUsers.setVisibility(View.INVISIBLE);
         }
     }
@@ -338,8 +333,7 @@ public class CritiqueFragment extends Fragment {
         Query query;
         if (lastKnownKey == null) {
             query = MainActivity.rootRef.child("user_index").orderByKey().limitToFirst(10);
-        }
-        else {
+        } else {
             Log.d("lastKnownKey", lastKnownKey);
             query = MainActivity.rootRef.child("user_index").orderByKey().startAt(lastKnownKey).limitToFirst(10);
         }
@@ -350,36 +344,21 @@ public class CritiqueFragment extends Fragment {
                 while (iterator.hasNext()) {
                     DataSnapshot data = iterator.next();
                     String key = data.getValue().toString();
+                    Log.d("PENDING USER", key);
                     lastKnownKey = data.getKey();
                     if (!key.equals(MyUser.getInstance().getUID()) && !MyUser.getInstance().seen(key) && !seenBuffer.contains(key)) {
                         userQueue.add(key);
                         seenBuffer.add(key);
+                        Log.d("PENDING USER", "APPROVED, ");
+                    } else {
+                        Log.d("PENDING USER", "DENIED");
                     }
                 }
                 if (!userQueue.isEmpty()) {
                     Log.d("path", "populateFromKey");
                     populateFromKey(userQueue.poll());
-                }
-                else {
-                    Query lastQuery = MainActivity.rootRef.child("user_index").orderByKey().limitToLast(1);
-                    lastQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            Log.d("final user3", dataSnapshot.getChildren().iterator().next().getKey());
-                            if (lastKnownKey.equals(dataSnapshot.getChildren().iterator().next().getKey())) {
-                                Log.d("outOfUsers", "initData");
-                                outOfUsers();
-                            }
-                            else {
-                                initData();
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(FirebaseError firebaseError) {
-
-                        }
-                    });
+                } else {
+                    isQueueExhausted();
                 }
             }
 
@@ -403,11 +382,9 @@ public class CritiqueFragment extends Fragment {
                         user.setUID(key);
                         Log.d("path", "calling getAge");
                         getAge(user);
-                    }
-                    else if (users.isEmpty() && !userQueue.isEmpty()) {
+                    } else if (users.isEmpty() && !userQueue.isEmpty()) {
                         populateFromKey(userQueue.poll());
-                    }
-                    else {
+                    } else {
                         Log.d("outOfUsers", "populateFromKey " + key);
                         //outOfUsers();
                     }
@@ -430,13 +407,11 @@ public class CritiqueFragment extends Fragment {
                     user.setAge(Integer.parseInt(dataSnapshot.getValue().toString()));
                     Log.d("path", "calling getGender");
                     getGender(user);
-                }
-                else if (users.isEmpty() && !userQueue.isEmpty()) {
+                } else if (users.isEmpty() && !userQueue.isEmpty()) {
                     populateFromKey(userQueue.poll());
-                }
-                else {
+                } else {
                     Log.d("outOfUsers", "getAge");
-                    outOfUsers();
+                    isQueueExhausted();
                 }
             }
 
@@ -456,19 +431,15 @@ public class CritiqueFragment extends Fragment {
                     if (approveUser(user)) {
                         Log.d("path", "calling getCard");
                         getCard(user);
-                    }
-                    else if (users.isEmpty() && !userQueue.isEmpty()) {
+                    } else if (users.isEmpty() && !userQueue.isEmpty()) {
                         populateFromKey(userQueue.poll());
-                    }
-                    else {
+                    } else {
                         Log.d("outOfUsers", "getGender");
-                        outOfUsers();
+                        isQueueExhausted();
                     }
-                }
-                else if (users.isEmpty() && !userQueue.isEmpty()) {
+                } else if (users.isEmpty() && !userQueue.isEmpty()) {
                     populateFromKey(userQueue.poll());
-                }
-                else {
+                } else {
                     Log.d("outOfUsers", "getGender2, " + user.getUID());
                     //outOfUsers();
                 }
@@ -495,14 +466,12 @@ public class CritiqueFragment extends Fragment {
                     outOfUsers();
                     Log.d("added user", user.getName());
                     Log.d("user size", Integer.toString(users.size()));
-                }
-                else if (users.isEmpty() && !userQueue.isEmpty()) {
+                } else if (users.isEmpty() && !userQueue.isEmpty()) {
                     Log.d("path", "calling populateFromKey cuz canceled");
                     populateFromKey(userQueue.poll());
-                }
-                else {
+                } else {
                     Log.d("outOfUsers", "getCard2");
-                    outOfUsers();
+                    isQueueExhausted();
                 }
             }
 
@@ -521,14 +490,14 @@ public class CritiqueFragment extends Fragment {
             }
             //just male on
             else if (isMaleOn && user.getGender() == OtherUser.MALE) {
-                    return true;
+                return true;
             }
             //just female on
             else if (isFemaleOn && user.getGender() == OtherUser.FEMALE) {
                 return true;
             }
             //neither
-            else if (!isFemaleOn && !isMaleOn && user.getGender() == OtherUser.NEITHER){
+            else if (!isFemaleOn && !isMaleOn && user.getGender() == OtherUser.NEITHER) {
                 return true;
             }
         }
@@ -557,4 +526,26 @@ public class CritiqueFragment extends Fragment {
         if (geoQuery != null)
             geoQuery.removeAllListeners();
     }
+
+    private void isQueueExhausted() {
+        Query lastQuery = MainActivity.rootRef.child("user_index").orderByKey().limitToLast(1);
+        lastQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+             @Override
+             public void onDataChange(DataSnapshot dataSnapshot) {
+                 Log.d("final user3", dataSnapshot.getChildren().iterator().next().getKey());
+                 if (lastKnownKey.equals(dataSnapshot.getChildren().iterator().next().getKey())) {
+                     Log.d("outOfUsers", "initData");
+                     outOfUsers();
+                 } else {
+                     initData();
+                 }
+             }
+
+             @Override
+             public void onCancelled(FirebaseError firebaseError) {
+
+             }
+         });
+    }
+
 }
