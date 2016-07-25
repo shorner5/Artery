@@ -302,7 +302,7 @@ public class CritiqueFragment extends Fragment {
                 if (!userQueue.isEmpty() && users.isEmpty()) {
                     populateFromKey(userQueue.poll());
                 }
-                isQueueExhausted();
+                outOfUsers();
             }
 
             @Override
@@ -533,11 +533,16 @@ public class CritiqueFragment extends Fragment {
              @Override
              public void onDataChange(DataSnapshot dataSnapshot) {
                  Log.d("final user3", dataSnapshot.getChildren().iterator().next().getKey());
-                 if (lastKnownKey.equals(dataSnapshot.getChildren().iterator().next().getKey())) {
-                     Log.d("outOfUsers", "initData");
+                 if (lastKnownKey != null) {
+                     if (lastKnownKey.equals(dataSnapshot.getChildren().iterator().next().getKey())) {
+                         Log.d("outOfUsers", "initData");
+                         outOfUsers();
+                     } else {
+                         initData();
+                     }
+                 }
+                 else {
                      outOfUsers();
-                 } else {
-                     initData();
                  }
              }
 
