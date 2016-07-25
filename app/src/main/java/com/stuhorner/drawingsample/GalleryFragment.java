@@ -64,7 +64,7 @@ public class GalleryFragment extends Fragment implements GalleryOptionsDialog.On
                 getActivity().invalidateOptionsMenu();
                 break;
             case GalleryOptionsDialog.REMOVE:
-                if (MyUser.getInstance().getGallery().size() < 2) {
+                if (gridView.getAdapter().getCount() < 2) {
                     noDeleteDialog();
                 }
                 else {

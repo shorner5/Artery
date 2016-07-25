@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Artery</string>
+    <string name="banner_ad_unit_id">ca-app-pub-2731350002741004/5246123570</string>
+    <string name="app_id">ca-app-pub-2731350002741004~3769390371</string>
 
     <string name="action_done">Done</string>
     <string name="action_erase">Erase</string>

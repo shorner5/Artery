@@ -27,6 +27,9 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ServerValue;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 import java.lang.CharSequence;
 import java.lang.String;
@@ -49,6 +52,12 @@ public class ChatPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_page);
         UID = getIntent().getStringExtra("UID");
+
+        //init ads
+        MobileAds.initialize(getApplicationContext(), getResources().getString(R.string.app_id));
+        AdView mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = getAdRequest();
+        mAdView.loadAd(adRequest);
 
         Window window = getWindow();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
@@ -112,24 +121,58 @@ public class ChatPage extends AppCompatActivity {
                             sendButton.startAnimation(scaleUp);
                             //launch chat bubble
                             Message messageToSend = new Message(editText.getText().toString(), MyUser.getInstance().getUID());
-                            //messages.add(messageToSend);
                             sendMessage(messageToSend);
                             editText.setText(null);
-                            //adapter.notifyDataSetChanged();
-                            //listView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
-                            //listView.post(new Runnable() {
-                              //  @Override
-                                //public void run() {
-                                  //  listView.smoothScrollToPosition(listView.getMaxScrollAmount());
-                                    //listView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
-                                //}
-                            //});
                         }
                         break;
                 }
                 return false;
             }
         });
+    }
+
+    private AdRequest getAdRequest() {
+        if (MyUser.getInstance().getLocation() != null) {
+            if (MyUser.getInstance().getGender() == MyUser.FEMALE) {
+                return new AdRequest.Builder()
+                        .setLocation(MyUser.getInstance().getLocation())
+                        .setGender(AdRequest.GENDER_FEMALE)
+                        .addTestDevice("8CEBDCE291011B1009AF3996B5D3A55A")
+                        .build();
+            }
+            else if (MyUser.getInstance().getGender() == MyUser.MALE) {
+                return new AdRequest.Builder()
+                        .setLocation(MyUser.getInstance().getLocation())
+                        .setGender(AdRequest.GENDER_MALE)
+                        .addTestDevice("8CEBDCE291011B1009AF3996B5D3A55A")
+                        .build();
+            }
+            else {
+                return new AdRequest.Builder()
+                        .setLocation(MyUser.getInstance().getLocation())
+                        .addTestDevice("8CEBDCE291011B1009AF3996B5D3A55A")
+                        .build();
+            }
+        }
+        else {
+            if (MyUser.getInstance().getGender() == MyUser.FEMALE) {
+                return new AdRequest.Builder()
+                        .setGender(AdRequest.GENDER_FEMALE)
+                        .addTestDevice("8CEBDCE291011B1009AF3996B5D3A55A")
+                        .build();
+            }
+            else if (MyUser.getInstance().getGender() == MyUser.MALE) {
+                return new AdRequest.Builder()
+                        .setGender(AdRequest.GENDER_MALE)
+                        .addTestDevice("8CEBDCE291011B1009AF3996B5D3A55A")
+                        .build();
+            }
+            else {
+                return new AdRequest.Builder()
+                        .addTestDevice("8CEBDCE291011B1009AF3996B5D3A55A")
+                        .build();
+            }
+        }
     }
 
     private void sendMessage(Message messageToSend) {
