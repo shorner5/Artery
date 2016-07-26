@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1007906908751",
+    "firebase_url": "https://artery.firebaseio.com",
+    "project_id": "project-1643875653152844547",
+    "storage_bucket": "project-1643875653152844547.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1007906908751:android:354f645cb8b1bd84",
+        "android_client_info": {
+          "package_name": "com.stuhorner.drawingsample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1007906908751-gred8toht3ufbcsqekv8fbfqgcg14v7i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOLlqey-DRbATcnQJLDXOqgRwokBsr1Zw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
