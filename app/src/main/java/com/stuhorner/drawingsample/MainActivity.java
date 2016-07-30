@@ -329,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     TextView title = (TextView) findViewById(R.id.header_username);
-                    if (title != null) {
+                    if (title != null && dataSnapshot.getValue() != null) {
                         title.setText(dataSnapshot.getValue().toString());
                     }
                 }

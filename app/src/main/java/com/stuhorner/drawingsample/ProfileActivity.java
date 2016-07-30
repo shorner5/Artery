@@ -287,7 +287,7 @@ public class ProfileActivity extends AppCompatActivity{
                     bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                 }
                 else {
-                    bm = BitmapFactory.decodeResource(getResources(),R.drawable.example_profilepic);
+                    bm = BitmapFactory.decodeResource(getResources(),R.drawable.default_background);
                 }
 
                 backdrop.setImageBitmap(bm);

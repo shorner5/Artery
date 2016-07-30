@@ -8,11 +8,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.util.Base64;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InterruptedIOException;
 
 /**
  * Created by Stu on 4/17/2016.
@@ -36,14 +39,30 @@ class BitmapUploadTask extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... params) {
         path = params[0];
-        BitmapFactory.Options options = new BitmapFactory.Options();
-       if (settings == PROFILE_PICTURE)
-          options.inSampleSize = 8;
-        Bitmap resizedBitmap = BitmapFactory.decodeFile(path, options);
+        Bitmap resizedBitmap = BitmapFactory.decodeFile(path);
+        if (settings == PROFILE_PICTURE) {
+            resizedBitmap = getResizedBitmap(resizedBitmap, 800);
+        }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         resizedBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] bytes = baos.toByteArray();
         return Base64.encodeToString(bytes, Base64.DEFAULT);
+    }
+
+    public Bitmap getResizedBitmap(Bitmap image, int maxSize) {
+        Log.d("resized", Integer.toString(maxSize));
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float bitmapRatio = (float) width / (float) height;
+        if (bitmapRatio > 1) {
+            width = maxSize;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxSize;
+            width = (int) (height * bitmapRatio);
+        }
+        return Bitmap.createScaledBitmap(image, width, height, true);
     }
 
     @Override

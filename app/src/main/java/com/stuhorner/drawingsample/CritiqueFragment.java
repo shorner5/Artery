@@ -302,7 +302,9 @@ public class CritiqueFragment extends Fragment {
                 if (!userQueue.isEmpty() && users.isEmpty()) {
                     populateFromKey(userQueue.poll());
                 }
-                outOfUsers();
+                else {
+                    outOfUsers();
+                }
             }
 
             @Override
